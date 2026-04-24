@@ -1,1 +1,3 @@
-export { default as HelloWorld } from "./HelloWorld";
+import Earth from "./Earth";
+
+export default Earth;

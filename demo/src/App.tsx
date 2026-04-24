@@ -1,8 +1,12 @@
-import { HelloWorld } from "react-earth";
+import Earth from "react-earth";
 import "react-earth/dist/index.css";
 
-function App() {
-  return <HelloWorld />;
-}
+const EarthView = () => {
+  return (
+    <div className="main-page">
+      <Earth />
+    </div>
+  );
+};
 
-export default App;
+export default EarthView;

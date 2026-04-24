@@ -1,9 +1,11 @@
-.center {
-  margin: 0;
-  width: 100%;
+.earth-root {
   height: 100%;
+  flex: 1;
+  position: relative;
+}
 
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.fill-screen {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
 }
