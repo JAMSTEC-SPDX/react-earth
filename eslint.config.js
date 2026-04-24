@@ -66,6 +66,12 @@ export default defineConfig([
         },
       ],
       "react-hooks/set-state-in-effect": "off",
+      "no-console": [
+        "error",
+        {
+          allow: ["info", "debug", "warn", "error"],
+        },
+      ],
     },
   },
 ]);
