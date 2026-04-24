@@ -7,8 +7,11 @@
     "demo"
   ],
   "scripts": {
+    "typecheck": "tsc --noEmit -p demo/tsconfig.app.json && tsc --noEmit -p lib/tsconfig.json",
     "lint": "eslint . --fix",
-    "format": "prettier --write ."
+    "lint:check": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier ."
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
