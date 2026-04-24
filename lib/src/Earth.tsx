@@ -2,15 +2,19 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 
 import * as d3 from "d3";
 import { geoPath, type GeoPermissibleObjects, type GeoSphere } from "d3-geo";
-import { LineString } from "geojson";
+import type { FeatureCollection, Geometry, LineString } from "geojson";
 
-import { useView } from "./utils/view";
 import { createProjection } from "./utils/projections";
+import { useView } from "./utils/view";
 import "./styles.css";
 
 const SPHERE: GeoSphere = { type: "Sphere" };
 
-const Earth = () => {
+type EarthProps = {
+  coastlines?: FeatureCollection<Geometry>;
+};
+
+const Earth = ({ coastlines }: EarthProps) => {
   const earthRoot = useRef<HTMLDivElement | null>(null);
   const globeSvgRef = useRef<SVGSVGElement | null>(null);
   const projectionRef = useRef<d3.GeoProjection | null>(null);
@@ -29,6 +33,15 @@ const Earth = () => {
 
     // Sphere
     globeSvg.append("path").datum(SPHERE).attr("fill", "#0a0a0a");
+
+    // Coastlines
+    globeSvg
+      .append("path")
+      .attr("class", "coastlines")
+      .datum(coastlines)
+      .attr("fill", "none")
+      .attr("stroke", "white")
+      .attr("stroke-width", 1);
 
     // Graticules (long/lat grid) and equator line
     const graticule = d3.geoGraticule();
@@ -65,6 +78,20 @@ const Earth = () => {
     projectionRef.current = createProjection(view);
     updateSvg();
   }, [globeSvgRef, view]);
+
+  useEffect(() => {
+    if (!coastlines) return;
+
+    const svg = globeSvgRef.current;
+    if (!svg) return;
+
+    const globeSvg = d3.select(svg);
+
+    globeSvg
+      .select(".coastlines")
+      .datum(coastlines)
+      .attr("d", d3.geoPath().projection(projectionRef.current!));
+  }, [coastlines]);
 
   return (
     <div ref={earthRoot} className="earth-root">
