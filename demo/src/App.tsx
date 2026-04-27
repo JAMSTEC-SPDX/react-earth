@@ -6,10 +6,14 @@ import "react-earth/dist/index.css";
 import { feature } from "topojson-client";
 import type { Topology } from "topojson-specification";
 
+import { DEFAULT_CONFIG } from "./consts";
+import EarthMenu from "./EarthMenu";
+
 const globeController = new GlobeController();
 
 const EarthView = () => {
   const [coastlines, setCoastlines] = useState<FeatureCollection<Geometry>>();
+  const [config, setConfig] = useState(DEFAULT_CONFIG);
 
   useEffect(() => {
     const fetchTopology = async () => {
@@ -33,6 +37,7 @@ const EarthView = () => {
   return (
     <div className="main-page">
       <Earth coastlines={coastlines} globeController={globeController} />
+      <EarthMenu config={config} setConfig={setConfig} />
     </div>
   );
 };
