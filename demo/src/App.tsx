@@ -17,7 +17,7 @@ const EarthView = () => {
   const [coastlines, setCoastlines] = useState<FeatureCollection<Geometry>>();
   const [config, setConfig] = useState(DEFAULT_CONFIG);
 
-  const { overlayToolBox } = useDataToolBox("wind");
+  const { overlayToolBox, streamInterpolate } = useDataToolBox("wind");
 
   const getColor = useMemo(
     () => getColorScale(overlayToolBox?.dataType || "wind"),
@@ -51,6 +51,7 @@ const EarthView = () => {
         projection={config.projection}
         overlayToolBox={overlayToolBox}
         getColor={getColor}
+        streamInterpolate={streamInterpolate}
       />
       <EarthMenu config={config} setConfig={setConfig} />
     </div>

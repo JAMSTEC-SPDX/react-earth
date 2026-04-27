@@ -106,6 +106,9 @@ export default function useDataToolBox(param: FieldType) {
   const [overlayToolBox, setOverlayToolBox] = useState<
     ExtendedOverlayToolBox<Vector> | ExtendedOverlayToolBox<number> | null
   >(null);
+  const [streamInterpolate, setStreamInterpolate] = useState<
+    ((λ: number, φ: number) => Vector | null) | null
+  >(null);
 
   const fetchData = async (param: FieldType) => {
     const filename = `data/${param}_data.json`;
@@ -128,10 +131,25 @@ export default function useDataToolBox(param: FieldType) {
     const updateOverlay = async () => {
       const overlayData = await fetchOverlayData(param);
       setOverlayToolBox(overlayData);
+
+      if (
+        overlayData?.dataType === "wind" ||
+        overlayData?.dataType === "current"
+      ) {
+        setStreamInterpolate(
+          () =>
+            overlayData.interpolate as (λ: number, φ: number) => Vector | null,
+        );
+      } else {
+        setStreamInterpolate(null);
+      }
     };
 
     updateOverlay();
   }, [param]);
 
-  return useMemo(() => ({ overlayToolBox }), [overlayToolBox]);
+  return useMemo(
+    () => ({ overlayToolBox, streamInterpolate }),
+    [overlayToolBox, streamInterpolate],
+  );
 }

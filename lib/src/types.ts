@@ -12,6 +12,15 @@ export type Projection = "ortho" | "equirectangular";
 
 export type View = { height: number; width: number };
 
+export type ViewBounds = {
+  x: number;
+  y: number;
+  xMax: number;
+  yMax: number;
+  width: number;
+  height: number;
+};
+
 // ******************
 // * Data types     *
 // ******************
@@ -43,3 +52,12 @@ export type BilinearInterpolatedGrid<T> = {
     g11: T,
   ) => T;
 };
+
+// ******************
+// * Vector types   *
+// ******************
+
+// Vectors may represent physical flows such as winds or ocean currents
+
+export type VectorValue = [number, number, number | null];
+export type VectorField = VectorValue[][];
