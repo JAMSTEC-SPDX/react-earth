@@ -12,6 +12,7 @@ Technology (JAMSTEC), which studies climate and works on forecasting it.
 - React handles UI and application state.
 - d3-geo computes projections and map geometry.
 - WebGL renders the scalar data overlay.
+- Canvas is used for particle-based vector field animation.
 
 ## Data flow
 
@@ -22,6 +23,13 @@ Each grid point stores either a scalar value or two components `(u, v)` when the
     flowchart TD
     A[GRIB-derived JSON data]
     B[Raw gridded field]
+
+    subgraph V["Vector field animation"]
+        F[Global interpolation]
+        G[Visible globe sampling]
+        H[Screen-space wind field]
+        I[Particle animation]
+    end
 
     subgraph S["Scalar field rendering"]
         C[Upload to WebGL texture]
@@ -34,14 +42,18 @@ Each grid point stores either a scalar value or two components `(u, v)` when the
     C --> D
     D --> E
 
+    B --> F
+    F --> G
+    G --> H
+    H --> I
 
     classDef source fill:#dcecff,stroke:#4a78c2,stroke-width:1.5px,color:#111;
     classDef process fill:#fff3b0,stroke:#b59b00,stroke-width:1px,color:#111;
     classDef output fill:#e7f7e7,stroke:#4f8a4f,stroke-width:1.5px,color:#111;
 
     class A source;
-    class B,C,D process;
-    class E output;
+    class B,C,D,F,G,H process;
+    class E,I output;
 ```
 
 ### Overlay rendering
@@ -57,6 +69,25 @@ For the orthographic projection, the overlay is drawn on a sphere mesh, whereas 
 4. The rotated point is projected to screen space (orthographic) or converted back to `(lon', lat')` (equirectangular).
 
 In both cases, the displayed color is obtained from the original gridded dataset after applying the current projection and rotation.
+
+### Vector field and particles animation
+
+When the dataset represents a vector field, such as wind, additional processing is performed to animate moving particles.
+
+1. The application builds an interpolation function over the full globe from the raw grid data.  
+   This allows the vector field to be evaluated continuously, including between original grid points.
+
+2. For the current view, the visible portion of the globe is computed and sampled to generate a screen-space wind field.  
+   For each visible point, the local vector value is evaluated and stored for animation.
+
+3. Particles are initialized at random positions, with random lifetimes, over the currently visible region.
+
+4. At each animation step, a particle is advected by the local vector field:
+   - if it remains in the visible field, it is drawn and moved forward,
+   - if it leaves the visible region, or if no valid motion is available, it is discarded,
+   - when a particle dies, a new one is spawned to replace it.
+
+This particle system produces the animated flow effect visible on top of the map.
 
 ## Grid data format
 

@@ -12,14 +12,17 @@ const MAX_SCALE = BASE_SCALE * 10;
 const ZOOM_INTENSITY = 0.001;
 
 type GlobeListener = {
-  /** used during drag and zoom to update svg+overlay, but not the wind animator */
+  /** used during drag and zoom to update svg+overlay, but not the vector animator */
   updateLayout: () => void;
+  /** reset the vector animator once the movement is over */
+  resetVectorAnimator: () => void;
 };
 
 export default class GlobeController {
   public rotation: [number, number] = currentPosition();
   public scale: number = BASE_SCALE;
   private listeners: Set<GlobeListener> = new Set();
+  private previousRedraw: number | null = null;
 
   setRotation(r: [number, number]) {
     this.rotation = r;
@@ -128,5 +131,11 @@ export default class GlobeController {
 
   emit() {
     this.listeners.forEach((listener) => listener.updateLayout());
+
+    // redraw the overlay only 120ms after the end of the zoom, to improve performance
+    if (this.previousRedraw) clearTimeout(this.previousRedraw);
+    this.previousRedraw = window.setTimeout(() => {
+      this.listeners.forEach((listener) => listener.resetVectorAnimator());
+    }, 120);
   }
 }

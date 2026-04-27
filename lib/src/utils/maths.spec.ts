@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { clamp, floorMod, isValue, proportion } from "./maths";
+import { clamp, ensureNumber, floorMod, isValue, proportion } from "./maths";
 
 describe("clamp", () => {
   it("should return the clamped value", () => {
@@ -9,6 +9,14 @@ describe("clamp", () => {
     expect(clamp(-1, 0, 10)).toBe(0);
     expect(clamp(10, 0, 10)).toBe(10);
     expect(clamp(15, 0, 10)).toBe(10);
+  });
+});
+
+describe("ensureNumber", () => {
+  it("should return the correct value", () => {
+    expect(ensureNumber(25, 20)).toBe(25);
+    expect(ensureNumber(Infinity, 20)).toBe(Infinity);
+    expect(ensureNumber(-Infinity, 20)).toBe(-Infinity);
   });
 });
 

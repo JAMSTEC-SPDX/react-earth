@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import type { FeatureCollection, Geometry } from "geojson";
 
@@ -7,9 +7,12 @@ import GlobeController from "./GlobeController";
 import type { OverlayToolBox, Projection, Vector } from "./types";
 import useOverlayController from "./useOverlayController";
 import useSvgController from "./useSvgController";
+import applyProjectionToVectorField from "./utils/applyProjectionToVectorField";
 import { type RGBAColor, setPixelColor } from "./utils/colors";
+import { createProjection } from "./utils/projections";
 import { useView } from "./utils/view";
 import "./styles.css";
+import { VectorAnimator } from "./VectorAnimator";
 
 type EarthProps = {
   coastlines?: FeatureCollection<Geometry>;
@@ -17,6 +20,7 @@ type EarthProps = {
   projection: Projection;
   overlayToolBox: OverlayToolBox<Vector> | OverlayToolBox<number> | null;
   getColor: (value: number, alpha?: number | undefined) => RGBAColor;
+  streamInterpolate?: ((λ: number, φ: number) => Vector | null) | null;
 };
 
 const Earth = ({
@@ -25,10 +29,13 @@ const Earth = ({
   projection,
   overlayToolBox,
   getColor,
+  streamInterpolate,
 }: EarthProps) => {
   const earthRoot = useRef<HTMLDivElement | null>(null);
   const globeSvgRef = useRef<SVGSVGElement | null>(null);
   const overlayCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const vectorCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const vectorAnimatorRef = useRef<VectorAnimator | null>(null);
 
   /**
    * rotationRef stores the current globe orientation as Euler angles [λ, φ, γ] in degrees.
@@ -52,6 +59,37 @@ const Earth = ({
     }
   }, [coastlines]);
 
+  // *******************
+  // * Vector animator *
+  // *******************
+  const resetVectorAnimator = useCallback(() => {
+    // clear previous canvas
+    vectorAnimatorRef.current?.stop(view);
+
+    const animationCtx = vectorCanvasRef.current?.getContext("2d");
+    if (!streamInterpolate || !animationCtx) return;
+
+    // rotate and scale projection, then compute vector field
+    const p = createProjection(view, projection);
+    p.rotate([...rotationRef.current, 0]).scale(scaleRef.current);
+
+    const vectorField = applyProjectionToVectorField(
+      streamInterpolate,
+      p,
+      projection,
+      view,
+    );
+
+    // animate vector particles
+    const animator = new VectorAnimator(animationCtx, vectorField, view, p);
+    vectorAnimatorRef.current = animator;
+    animator.start();
+
+    return () => {
+      animator.stop(view);
+    };
+  }, [streamInterpolate, projection, view]);
+
   // ********************
   // * First render     *
   // ********************
@@ -69,6 +107,7 @@ const Earth = ({
       rotationRef.current,
       scaleRef.current,
     );
+    resetVectorAnimator();
   }, [svgController, overlayController]);
 
   // ********************
@@ -77,6 +116,10 @@ const Earth = ({
   useEffect(() => {
     if (!overlayToolBox) overlayController?.deactivateOverlay();
   }, [overlayToolBox]);
+
+  useEffect(() => {
+    resetVectorAnimator();
+  }, [streamInterpolate]);
 
   useEffect(() => {
     if (!overlayController || !overlayToolBox) {
@@ -121,6 +164,7 @@ const Earth = ({
       rotationRef.current,
       scaleRef.current,
     );
+    resetVectorAnimator();
   }, [projection, view]);
 
   // ********************
@@ -130,6 +174,9 @@ const Earth = ({
     if (!svgController) return;
 
     const updateLayout = () => {
+      // clear animation before dragging or zooming
+      vectorAnimatorRef.current?.stop(view);
+
       rotationRef.current = globeController.rotation;
       scaleRef.current = globeController.scale;
 
@@ -142,11 +189,12 @@ const Earth = ({
     };
 
     const unsubscribeGlobeController = globeController.subscribe(globeSvgRef, {
+      resetVectorAnimator,
       updateLayout,
     });
 
     return () => unsubscribeGlobeController();
-  }, [svgController]);
+  }, [svgController, resetVectorAnimator]);
 
   return (
     <div ref={earthRoot} className="earth-root">
@@ -158,6 +206,12 @@ const Earth = ({
       />
       <canvas
         ref={overlayCanvasRef}
+        className="fill-screen no-pointer-events"
+        width={view.width}
+        height={view.height}
+      />
+      <canvas
+        ref={vectorCanvasRef}
         className="fill-screen no-pointer-events"
         width={view.width}
         height={view.height}
