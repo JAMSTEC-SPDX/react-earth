@@ -2,9 +2,12 @@ import { useEffect, useRef } from "react";
 
 import type { FeatureCollection, Geometry } from "geojson";
 
+import { TRANSPARENT_BLACK } from "./consts";
 import GlobeController from "./GlobeController";
-import type { Projection } from "./types";
+import type { OverlayToolBox, Projection, Vector } from "./types";
+import useOverlayController from "./useOverlayController";
 import useSvgController from "./useSvgController";
+import { type RGBAColor, setPixelColor } from "./utils/colors";
 import { useView } from "./utils/view";
 import "./styles.css";
 
@@ -12,11 +15,20 @@ type EarthProps = {
   coastlines?: FeatureCollection<Geometry>;
   globeController: GlobeController;
   projection: Projection;
+  overlayToolBox: OverlayToolBox<Vector> | OverlayToolBox<number> | null;
+  getColor: (value: number, alpha?: number | undefined) => RGBAColor;
 };
 
-const Earth = ({ coastlines, globeController, projection }: EarthProps) => {
+const Earth = ({
+  coastlines,
+  globeController,
+  projection,
+  overlayToolBox,
+  getColor,
+}: EarthProps) => {
   const earthRoot = useRef<HTMLDivElement | null>(null);
   const globeSvgRef = useRef<SVGSVGElement | null>(null);
+  const overlayCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   /**
    * rotationRef stores the current globe orientation as Euler angles [λ, φ, γ] in degrees.
@@ -32,6 +44,7 @@ const Earth = ({ coastlines, globeController, projection }: EarthProps) => {
   const view = useView(earthRoot);
 
   const svgController = useSvgController(globeSvgRef);
+  const overlayController = useOverlayController(overlayCanvasRef);
 
   useEffect(() => {
     if (svgController && coastlines) {
@@ -43,14 +56,55 @@ const Earth = ({ coastlines, globeController, projection }: EarthProps) => {
   // * First render     *
   // ********************
   useEffect(() => {
-    if (!svgController) return;
+    if (!svgController || !overlayController) return;
+
     svgController.changeProjection(
       view,
       projection,
       scaleRef.current,
       rotationRef.current,
     );
-  }, [svgController]);
+    overlayController.drawOverlay(
+      projection,
+      rotationRef.current,
+      scaleRef.current,
+    );
+  }, [svgController, overlayController]);
+
+  // ********************
+  // * On data change   *
+  // ********************
+  useEffect(() => {
+    if (!overlayToolBox) overlayController?.deactivateOverlay();
+  }, [overlayToolBox]);
+
+  useEffect(() => {
+    if (!overlayController || !overlayToolBox) {
+      overlayController?.deactivateOverlay();
+      return;
+    }
+
+    const {
+      overlayData,
+      grid: { nx, ny },
+    } = overlayToolBox;
+
+    // Create a buffer of colors RGBA from the overlay data, which corresponds
+    // to the texture for the webGL overlay
+    const colorData = new Float32Array(overlayData.length * 4);
+    for (let i = 0; i < overlayData.length; i++) {
+      const value = overlayData[i];
+      const color = value !== null ? getColor(value) : TRANSPARENT_BLACK;
+      setPixelColor(colorData, i, color);
+    }
+
+    overlayController.setupTexture(colorData, nx, ny);
+    overlayController.drawOverlay(
+      projection,
+      rotationRef.current,
+      scaleRef.current,
+    );
+  }, [getColor]);
 
   // *********************************************
   // * On projection change or window resize     *
@@ -61,6 +115,11 @@ const Earth = ({ coastlines, globeController, projection }: EarthProps) => {
       projection,
       scaleRef.current,
       rotationRef.current,
+    );
+    overlayController?.drawOverlay(
+      projection,
+      rotationRef.current,
+      scaleRef.current,
     );
   }, [projection, view]);
 
@@ -75,6 +134,11 @@ const Earth = ({ coastlines, globeController, projection }: EarthProps) => {
       scaleRef.current = globeController.scale;
 
       svgController.updateProjection(scaleRef.current, rotationRef.current);
+      overlayController?.drawOverlay(
+        projection,
+        rotationRef.current,
+        scaleRef.current,
+      );
     };
 
     const unsubscribeGlobeController = globeController.subscribe(globeSvgRef, {
@@ -89,6 +153,12 @@ const Earth = ({ coastlines, globeController, projection }: EarthProps) => {
       <svg
         ref={globeSvgRef}
         className="fill-screen"
+        width={view.width}
+        height={view.height}
+      />
+      <canvas
+        ref={overlayCanvasRef}
+        className="fill-screen no-pointer-events"
         width={view.width}
         height={view.height}
       />

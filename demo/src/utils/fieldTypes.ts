@@ -1,0 +1,140 @@
+import {
+  getSegmentedColorScaleFunction,
+  type ColorSegment,
+  type RGBAColor,
+} from "react-earth";
+
+import type { FieldType, ColorScaleBounds } from "../types";
+import { linearInterpolate } from "./maths";
+
+export function isScalar(fieldType: FieldType) {
+  switch (fieldType) {
+    case "wind":
+    case "current":
+      return false;
+    case "temperature":
+      return true;
+    default:
+      throw new Error(`Field type ${fieldType} not handled`);
+  }
+}
+
+export function getColorScale(
+  fieldType: FieldType,
+): (value: number, alpha?: number) => RGBAColor {
+  let colorSegments: ColorSegment[];
+  switch (fieldType) {
+    case "wind": {
+      const colorScaleBounds = {
+        lowerBound: WIND_LOWER_BOUND,
+        upperBound: WIND_UPPER_BOUND,
+      };
+      colorSegments = getWindColorScale(colorScaleBounds);
+      break;
+    }
+    case "temperature": {
+      const colorScaleBounds = {
+        lowerBound: TEMP_LOWER_BOUND,
+        upperBound: TEMP_UPPER_BOUND,
+      };
+      colorSegments = getTemperatureColorScale(colorScaleBounds);
+      break;
+    }
+    case "current": {
+      const colorScaleBounds = {
+        lowerBound: CURRENT_LOWER_BOUND,
+        upperBound: CURRENT_UPPER_BOUND,
+      };
+      colorSegments = getCurrentColorScale(colorScaleBounds);
+      break;
+    }
+    default:
+      throw new Error(`Field type ${fieldType} not handled`);
+  }
+
+  return getSegmentedColorScaleFunction(colorSegments);
+}
+
+// **************
+// * WIND       *
+// **************
+
+// blue -> green -> yellow -> pink
+const WIND_LOWER_BOUND = 0;
+const WIND_UPPER_BOUND = 3;
+
+const getWindColorScale = ({
+  lowerBound,
+  upperBound,
+}: ColorScaleBounds): ColorSegment[] => [
+  { bound: lowerBound, color: [0, 0, 255] },
+  {
+    bound: linearInterpolate(lowerBound, upperBound, 0.1),
+    color: [0, 102, 255],
+  },
+  {
+    bound: linearInterpolate(lowerBound, upperBound, 0.5),
+    color: [102, 255, 0],
+  },
+  {
+    bound: linearInterpolate(lowerBound, upperBound, 0.75),
+    color: [255, 255, 102],
+  },
+  { bound: upperBound, color: [255, 204, 255] },
+];
+
+// ***************
+// * Temperature *
+// ***************
+
+// blue -> white -> red
+const TEMP_LOWER_BOUND = -2;
+const TEMP_UPPER_BOUND = 2;
+
+const getTemperatureColorScale = ({
+  lowerBound,
+  upperBound,
+}: ColorScaleBounds): ColorSegment[] => [
+  { bound: lowerBound, color: [0, 0, 255] },
+  {
+    bound: linearInterpolate(lowerBound, upperBound, 0.25),
+    color: [0, 102, 255],
+  },
+  {
+    bound: linearInterpolate(lowerBound, upperBound, 0.5),
+    color: [255, 255, 255],
+  },
+  {
+    bound: linearInterpolate(lowerBound, upperBound, 0.75),
+    color: [255, 51, 153],
+  },
+  { bound: upperBound, color: [255, 0, 0] },
+];
+
+// ******************
+// * OCEAN CURRENTS *
+// ******************
+
+// blue -> green -> yellow -> pink
+const CURRENT_LOWER_BOUND = 0;
+const CURRENT_UPPER_BOUND = 150;
+
+const getCurrentColorScale = ({
+  lowerBound,
+  upperBound,
+}: ColorScaleBounds): ColorSegment[] => [
+  { bound: lowerBound, color: [0, 0, 255] },
+  {
+    bound: linearInterpolate(lowerBound, upperBound, 0.1),
+    color: [0, 102, 255],
+  },
+  {
+    bound: linearInterpolate(lowerBound, upperBound, 0.4),
+    color: [102, 255, 0],
+  },
+  {
+    bound: linearInterpolate(lowerBound, upperBound, 0.7),
+    color: [255, 255, 102],
+  },
+  { bound: upperBound, color: [255, 204, 255] },
+];
