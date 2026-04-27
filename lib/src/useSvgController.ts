@@ -10,7 +10,12 @@ import { createProjection } from "./utils/projections";
 const SPHERE: GeoSphere = { type: "Sphere" };
 
 type SvgController = {
-  changeProjection: (view: View) => void;
+  changeProjection: (
+    view: View,
+    scale: number,
+    rotation: [number, number],
+  ) => void;
+  updateProjection: (scale: number, rotation: [number, number]) => void;
   updateCoastlines: (coastlines: FeatureCollection<Geometry>) => void;
 };
 
@@ -88,14 +93,29 @@ const useSvgController = (
       updateSvg();
     };
 
-    const changeProjection = (view: View) => {
-      projectionRef.current = createProjection(view);
+    const changeProjection = (
+      view: View,
+      scale: number,
+      rotation: [number, number],
+    ) => {
+      projectionRef.current = createProjection(view)
+        .rotate([...rotation, 0])
+        .scale(scale);
+
+      updateSvg();
+    };
+
+    const updateProjection = (scale: number, rotation: [number, number]) => {
+      if (!projectionRef.current) return;
+      projectionRef.current.rotate([...rotation, 0]).scale(scale);
+
       updateSvg();
     };
 
     setSvgController({
-      updateCoastlines,
       changeProjection,
+      updateProjection,
+      updateCoastlines,
     });
   }, [globeSvgRef]);
 
