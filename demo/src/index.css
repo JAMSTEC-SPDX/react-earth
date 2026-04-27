@@ -38,3 +38,96 @@ body {
   height: 100%;
   width: 100%;
 }
+
+/**************************************************************************************************
+ * Menu Styling
+ **************************************************************************************************/
+.earth-menu {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  letter-spacing: 0.4px;
+  z-index: 1000;
+  max-width: 90%;
+  text-align: left;
+  pointer-events: none;
+}
+
+.menu-toggle {
+  background: rgba(0, 0, 0, 0);
+  color: #cccccc;
+  padding: 6px 14px;
+  cursor: pointer;
+  text-transform: lowercase;
+  font-size: 20px;
+  border: none;
+  pointer-events: auto;
+}
+
+.menu-toggle:hover {
+  color: white;
+}
+
+.menu-panel {
+  background: rgba(0, 0, 0, 0.78);
+  border: 1px solid white;
+  font-size: 15px;
+  min-width: 250px;
+  padding: 12px 12px;
+  margin-bottom: 8px;
+  backdrop-filter: blur(4px);
+  pointer-events: auto;
+}
+
+.menu-panel.closed {
+  display: none;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+}
+
+.setting-label {
+  position: relative;
+  text-align: left;
+  color: white;
+  width: 120px;
+  flex-shrink: 0;
+  margin-right: 12px;
+}
+
+.setting-label::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  right: 0;
+  width: 2px;
+  background: white;
+}
+
+.setting-options {
+  display: flex;
+  gap: 4px 14px;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.setting-option {
+  background: none;
+  border: none;
+  color: #8a8a8a;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.setting-option:hover {
+  color: #cccccc;
+}
+
+.setting-option.active {
+  color: white;
+}
