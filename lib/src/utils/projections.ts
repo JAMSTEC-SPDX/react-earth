@@ -1,6 +1,6 @@
 import * as d3 from "d3-geo";
 
-import type { View } from "../types";
+import type { Projection, View } from "../types";
 import { floorMod } from "./maths";
 
 /**
@@ -13,14 +13,29 @@ export function currentPosition(): [number, number] {
   return [λ, 0];
 }
 
-export function createProjection({ width, height }: View) {
-  return (
-    d3
-      .geoOrthographic()
-      .precision(0.1)
-      // clips geometry beyond 90° so only the visible hemisphere of the globe is rendered
-      .clipAngle(90)
-      // center the globe in the view
-      .translate([width / 2, height / 2])
-  );
+export function createProjection(
+  { width, height }: View,
+  projectionType: Projection,
+) {
+  switch (projectionType) {
+    case "ortho":
+      return (
+        d3
+          .geoOrthographic()
+          .precision(0.1)
+          // clips geometry beyond 90° so only the visible hemisphere of the globe is rendered
+          .clipAngle(90)
+          // center the globe in the view
+          .translate([width / 2, height / 2])
+      );
+    case "equirectangular":
+      return d3
+        .geoEquirectangular()
+        .rotate(currentPosition())
+        .precision(0.1)
+        .scale(width / (2 * Math.PI))
+        .translate([width / 2, height / 2]);
+    default:
+      throw new Error(`Projection ${projectionType} not supported.`);
+  }
 }

@@ -1,3 +1,9 @@
+// ***************************
+// * Configuration types     *
+// ***************************
+
+export type Projection = "ortho" | "equirectangular";
+
 // ******************
 // * View types     *
 // ******************

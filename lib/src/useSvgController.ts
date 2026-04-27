@@ -4,7 +4,7 @@ import * as d3 from "d3";
 import { geoPath, type GeoPermissibleObjects, type GeoSphere } from "d3-geo";
 import type { FeatureCollection, Geometry, LineString } from "geojson";
 
-import type { View } from "./types";
+import type { Projection, View } from "./types";
 import { createProjection } from "./utils/projections";
 
 const SPHERE: GeoSphere = { type: "Sphere" };
@@ -12,6 +12,7 @@ const SPHERE: GeoSphere = { type: "Sphere" };
 type SvgController = {
   changeProjection: (
     view: View,
+    projection: Projection,
     scale: number,
     rotation: [number, number],
   ) => void;
@@ -95,10 +96,11 @@ const useSvgController = (
 
     const changeProjection = (
       view: View,
+      projection: Projection,
       scale: number,
       rotation: [number, number],
     ) => {
-      projectionRef.current = createProjection(view)
+      projectionRef.current = createProjection(view, projection)
         .rotate([...rotation, 0])
         .scale(scale);
 
