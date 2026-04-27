@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { FeatureCollection, Geometry } from "geojson";
 import Earth, { GlobeController } from "react-earth";
@@ -8,12 +8,21 @@ import type { Topology } from "topojson-specification";
 
 import { DEFAULT_CONFIG } from "./consts";
 import EarthMenu from "./EarthMenu";
+import useDataToolBox from "./useDataToolBox";
+import { getColorScale } from "./utils/fieldTypes";
 
 const globeController = new GlobeController();
 
 const EarthView = () => {
   const [coastlines, setCoastlines] = useState<FeatureCollection<Geometry>>();
   const [config, setConfig] = useState(DEFAULT_CONFIG);
+
+  const { overlayToolBox } = useDataToolBox("wind");
+
+  const getColor = useMemo(
+    () => getColorScale(overlayToolBox?.dataType || "wind"),
+    [overlayToolBox?.dataType],
+  );
 
   useEffect(() => {
     const fetchTopology = async () => {
@@ -40,6 +49,8 @@ const EarthView = () => {
         coastlines={coastlines}
         globeController={globeController}
         projection={config.projection}
+        overlayToolBox={overlayToolBox}
+        getColor={getColor}
       />
       <EarthMenu config={config} setConfig={setConfig} />
     </div>

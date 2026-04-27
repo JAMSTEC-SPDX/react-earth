@@ -9,3 +9,7 @@
   inset: 0;
   will-change: transform;
 }
+
+.no-pointer-events {
+  pointer-events: none;
+}
