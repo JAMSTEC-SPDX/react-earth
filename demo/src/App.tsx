@@ -36,7 +36,11 @@ const EarthView = () => {
 
   return (
     <div className="main-page">
-      <Earth coastlines={coastlines} globeController={globeController} />
+      <Earth
+        coastlines={coastlines}
+        globeController={globeController}
+        projection={config.projection}
+      />
       <EarthMenu config={config} setConfig={setConfig} />
     </div>
   );

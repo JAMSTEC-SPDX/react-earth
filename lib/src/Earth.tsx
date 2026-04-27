@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import type { FeatureCollection, Geometry } from "geojson";
 
 import GlobeController from "./GlobeController";
+import type { Projection } from "./types";
 import useSvgController from "./useSvgController";
 import { useView } from "./utils/view";
 import "./styles.css";
@@ -10,9 +11,10 @@ import "./styles.css";
 type EarthProps = {
   coastlines?: FeatureCollection<Geometry>;
   globeController: GlobeController;
+  projection: Projection;
 };
 
-const Earth = ({ coastlines, globeController }: EarthProps) => {
+const Earth = ({ coastlines, globeController, projection }: EarthProps) => {
   const earthRoot = useRef<HTMLDivElement | null>(null);
   const globeSvgRef = useRef<SVGSVGElement | null>(null);
 
@@ -42,8 +44,25 @@ const Earth = ({ coastlines, globeController }: EarthProps) => {
   // ********************
   useEffect(() => {
     if (!svgController) return;
-    svgController.changeProjection(view, scaleRef.current, rotationRef.current);
+    svgController.changeProjection(
+      view,
+      projection,
+      scaleRef.current,
+      rotationRef.current,
+    );
   }, [svgController]);
+
+  // *********************************************
+  // * On projection change or window resize     *
+  // *********************************************
+  useEffect(() => {
+    svgController?.changeProjection(
+      view,
+      projection,
+      scaleRef.current,
+      rotationRef.current,
+    );
+  }, [projection, view]);
 
   // ********************
   // * Interactions     *
