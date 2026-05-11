@@ -3,6 +3,7 @@ import type { OverlayToolBox, Projection } from "react-earth";
 
 export type Config = {
   projection: Projection;
+  param: FieldType;
 };
 
 export type ColorScaleBounds = {

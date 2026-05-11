@@ -48,9 +48,19 @@ const EarthMenu = ({ config, setConfig }: EarthMenuProps) => {
     setOpen(!open);
   };
 
-  const updateConfig = (option: string) => {
-    if (option === "ortho" || option === "equirectangular") {
-      setConfig({ projection: option });
+  const updateConfig = (configKey: keyof Config, option: string) => {
+    if (configKey === "projection") {
+      if (option === "ortho" || option === "equirectangular") {
+        setConfig((prev) => ({ ...prev, projection: option }));
+      }
+    } else {
+      if (
+        option === "wind" ||
+        option === "current" ||
+        option === "temperature"
+      ) {
+        setConfig((prev) => ({ ...prev, param: option }));
+      }
     }
   };
 
@@ -58,10 +68,16 @@ const EarthMenu = ({ config, setConfig }: EarthMenuProps) => {
     <>
       <div className={`menu-panel ${!open ? "closed" : ""}`}>
         <MenuRow
+          setting="overlay"
+          options={["wind", "current", "temperature"]}
+          selected={config.param}
+          onClick={(option: string) => updateConfig("param", option)}
+        />
+        <MenuRow
           setting="projection"
           options={["ortho", "equirectangular"]}
           selected={config.projection}
-          onClick={(option: string) => updateConfig(option)}
+          onClick={(option: string) => updateConfig("projection", option)}
         />
       </div>
       <button
