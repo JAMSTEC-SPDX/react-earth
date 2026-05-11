@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { FeatureCollection, Geometry } from "geojson";
-import Earth, { GlobeController } from "react-earth";
+import Earth, { GlobeController, type Marker } from "react-earth";
 import "react-earth/dist/index.css";
 import { feature } from "topojson-client";
 import type { Topology } from "topojson-specification";
@@ -43,6 +43,19 @@ const EarthView = () => {
     fetchTopology();
   }, []);
 
+  // ********************
+  // * Marker
+  // ********************
+  const [marker, setMarker] = useState<Marker>();
+
+  const selectMarker = useCallback((λ: number, φ: number) => {
+    setMarker({ lon: λ, lat: φ });
+  }, []);
+
+  const removeMarker = useCallback(() => {
+    setMarker(undefined);
+  }, []);
+
   return (
     <div className="main-page">
       <Earth
@@ -52,6 +65,9 @@ const EarthView = () => {
         overlayToolBox={overlayToolBox}
         getColor={getColor}
         streamInterpolate={streamInterpolate}
+        marker={marker}
+        selectMarker={selectMarker}
+        removeMarker={removeMarker}
       />
       <EarthMenu config={config} setConfig={setConfig} />
     </div>

@@ -4,12 +4,12 @@ import type { FeatureCollection, Geometry } from "geojson";
 
 import { TRANSPARENT_BLACK } from "./consts";
 import GlobeController from "./GlobeController";
-import type { OverlayToolBox, Projection, Vector, View } from "./types";
+import type { Marker, OverlayToolBox, Projection, Vector, View } from "./types";
 import useOverlayController from "./useOverlayController";
 import useSvgController from "./useSvgController";
 import applyProjectionToVectorField from "./utils/applyProjectionToVectorField";
 import { type RGBAColor, setPixelColor } from "./utils/colors";
-import { createProjection } from "./utils/projections";
+import { createProjection, isInsideCircle } from "./utils/projections";
 import { useView } from "./utils/view";
 import "./styles.css";
 import { VectorAnimator } from "./VectorAnimator";
@@ -21,6 +21,9 @@ type EarthProps = {
   overlayToolBox: OverlayToolBox<Vector> | OverlayToolBox<number> | null;
   getColor: (value: number, alpha?: number | undefined) => RGBAColor;
   streamInterpolate?: ((λ: number, φ: number) => Vector | null) | null;
+  marker?: Marker;
+  selectMarker?: (λ: number, φ: number) => void;
+  removeMarker?: () => void;
 };
 
 const Earth = ({
@@ -30,12 +33,16 @@ const Earth = ({
   overlayToolBox,
   getColor,
   streamInterpolate,
+  marker,
+  selectMarker,
+  removeMarker,
 }: EarthProps) => {
   const earthRoot = useRef<HTMLDivElement | null>(null);
   const globeSvgRef = useRef<SVGSVGElement | null>(null);
   const overlayCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const vectorCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const vectorAnimatorRef = useRef<VectorAnimator | null>(null);
+  const foregroundRef = useRef<SVGSVGElement | null>(null);
 
   /**
    * rotationRef stores the current globe orientation as Euler angles [λ, φ, γ] in degrees.
@@ -49,7 +56,7 @@ const Earth = ({
   const scaleRef = useRef(globeController.scale);
 
   const view = useView(earthRoot);
-  const svgController = useSvgController(globeSvgRef);
+  const svgController = useSvgController(globeSvgRef, foregroundRef);
   const overlayController = useOverlayController(overlayCanvasRef);
 
   // introduce some ref to avoid re-subscribing interaction listeners on every change
@@ -186,6 +193,27 @@ const Earth = ({
   useEffect(() => {
     if (!svgController) return;
 
+    const handleClick = (event: MouseEvent) => {
+      if (!globeSvgRef.current || !selectMarker || !removeMarker) return;
+
+      const rect = globeSvgRef.current.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      const p = createProjection(view, projection);
+      p.rotate([...rotationRef.current, 0]).scale(scaleRef.current);
+
+      if (!isInsideCircle(view, p, x, y)) removeMarker();
+      else {
+        // update marker
+        const coords = p.invert!([x, y]);
+        if (coords) {
+          const [λ, φ] = coords;
+          selectMarker(λ, φ);
+        }
+      }
+    };
+
     const updateLayout = () => {
       // clear animation before dragging or zooming
       vectorAnimatorRef.current?.stop();
@@ -204,10 +232,18 @@ const Earth = ({
     const unsubscribeGlobeController = globeController.subscribe(globeSvgRef, {
       resetVectorAnimator,
       updateLayout,
+      handleClick,
     });
 
     return () => unsubscribeGlobeController();
   }, [svgController]);
+
+  useEffect(() => {
+    if (svgController) {
+      if (marker) svgController.drawMarker(marker);
+      else svgController.removeMarker();
+    }
+  }, [svgController, marker]);
 
   return (
     <div ref={earthRoot} className="earth-root">
@@ -225,6 +261,12 @@ const Earth = ({
       />
       <canvas
         ref={vectorCanvasRef}
+        className="fill-screen no-pointer-events"
+        width={view.width}
+        height={view.height}
+      />
+      <svg
+        ref={foregroundRef}
         className="fill-screen no-pointer-events"
         width={view.width}
         height={view.height}

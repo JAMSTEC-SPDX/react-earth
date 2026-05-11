@@ -2,9 +2,9 @@ import { useRef, useLayoutEffect, useState } from "react";
 
 import * as d3 from "d3";
 import { geoPath, type GeoPermissibleObjects, type GeoSphere } from "d3-geo";
-import type { FeatureCollection, Geometry, LineString } from "geojson";
+import type { FeatureCollection, Geometry, LineString, Point } from "geojson";
 
-import type { Projection, View } from "./types";
+import type { View, Projection, Marker } from "./types";
 import { createProjection } from "./utils/projections";
 
 const SPHERE: GeoSphere = { type: "Sphere" };
@@ -18,12 +18,17 @@ type SvgController = {
   ) => void;
   updateProjection: (scale: number, rotation: [number, number]) => void;
   updateCoastlines: (coastlines: FeatureCollection<Geometry>) => void;
+  drawMarker: (marker: Marker) => void;
+  moveMarker: () => void;
+  removeMarker: () => void;
 };
 
 const useSvgController = (
   globeSvgRef: React.RefObject<SVGSVGElement | null>,
+  foregroundRef: React.RefObject<SVGSVGElement | null>,
 ) => {
   const projectionRef = useRef<d3.GeoProjection | null>(null);
+  const markerRef = useRef<Marker | null>(null);
   const [svgController, setSvgController] = useState<SvgController | null>(
     null,
   );
@@ -72,6 +77,56 @@ const useSvgController = (
     // **************
     // * SVG update *
     // **************
+    const moveMarker = () => {
+      if (
+        !foregroundRef.current ||
+        !markerRef.current ||
+        !projectionRef.current
+      )
+        return;
+
+      const path = geoPath<SVGPathElement, GeoPermissibleObjects>().projection(
+        projectionRef.current,
+      );
+
+      const markerSvg = d3
+        .select(foregroundRef.current)
+        .select<SVGPathElement>(".location-mark");
+      if (!markerSvg.node()) return;
+
+      const point: Point = {
+        type: "Point",
+        coordinates: [markerRef.current.lon, markerRef.current.lat],
+      };
+      markerSvg.datum(point).attr("d", path);
+    };
+
+    const drawMarker = (marker: Marker) => {
+      if (!foregroundRef.current) return;
+      markerRef.current = marker;
+
+      let markerSvg = d3
+        .select(foregroundRef.current)
+        .select<SVGPathElement>(".location-mark");
+      if (!markerSvg.node()) {
+        markerSvg = d3
+          .select(foregroundRef.current)
+          .append("path")
+          .attr("class", "location-mark");
+      }
+
+      moveMarker();
+    };
+
+    const removeMarker = () => {
+      if (!foregroundRef.current) return;
+
+      markerRef.current = null;
+      d3.select(foregroundRef.current)
+        .select<SVGPathElement>(".location-mark")
+        .remove();
+    };
+
     const updateSvg = () => {
       const path = geoPath<SVGPathElement, GeoPermissibleObjects>().projection(
         projectionRef.current!,
@@ -79,6 +134,7 @@ const useSvgController = (
       globeSvg
         .selectAll<SVGPathElement, GeoPermissibleObjects>("path")
         .attr("d", path);
+      moveMarker();
     };
 
     const updateCoastlines = (coastlines: FeatureCollection<Geometry>) => {
@@ -118,8 +174,11 @@ const useSvgController = (
       changeProjection,
       updateProjection,
       updateCoastlines,
+      drawMarker,
+      moveMarker,
+      removeMarker,
     });
-  }, [globeSvgRef]);
+  }, []);
 
   return svgController;
 };

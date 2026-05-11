@@ -13,3 +13,9 @@
 .no-pointer-events {
   pointer-events: none;
 }
+
+.location-mark {
+  stroke: #3aff3a;
+  stroke-width: 2.5;
+  fill: none;
+}
