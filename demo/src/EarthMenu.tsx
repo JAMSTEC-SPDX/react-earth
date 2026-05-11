@@ -55,7 +55,7 @@ const EarthMenu = ({ config, setConfig }: EarthMenuProps) => {
   };
 
   return (
-    <div className="earth-menu">
+    <>
       <div className={`menu-panel ${!open ? "closed" : ""}`}>
         <MenuRow
           setting="projection"
@@ -71,7 +71,7 @@ const EarthMenu = ({ config, setConfig }: EarthMenuProps) => {
       >
         earth
       </button>
-    </div>
+    </>
   );
 };
 
