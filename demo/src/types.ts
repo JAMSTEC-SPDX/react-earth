@@ -1,3 +1,4 @@
+import type { Marker, Vector } from "react-earth";
 import type { OverlayToolBox, Projection } from "react-earth";
 
 export type Config = {
@@ -52,3 +53,12 @@ export type ExtendedOverlayToolBox<T> = OverlayToolBox<T> & {
   dataType: FieldType;
   getScalarForOverlay: (λ: number, φ: number) => number | null;
 };
+
+export type ExtendedMarker = Marker & { type: FieldType } & (
+    | {
+        isScalar: true;
+        type: "temperature";
+        value: number;
+      }
+    | { isScalar: false; type: "wind" | "current"; value: Vector | null }
+  );

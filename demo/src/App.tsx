@@ -1,15 +1,18 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { FeatureCollection, Geometry } from "geojson";
-import Earth, { GlobeController, type Marker } from "react-earth";
+import Earth, { GlobeController } from "react-earth";
 import "react-earth/dist/index.css";
 import { feature } from "topojson-client";
 import type { Topology } from "topojson-specification";
 
 import { DEFAULT_CONFIG } from "./consts";
 import EarthMenu from "./EarthMenu";
+import MarkerPanel from "./MarkerPanel";
+import type { ExtendedMarker } from "./types";
 import useDataToolBox from "./useDataToolBox";
 import { getColorScale } from "./utils/fieldTypes";
+import { getMarkerData } from "./utils/utils";
 
 const globeController = new GlobeController();
 
@@ -46,10 +49,21 @@ const EarthView = () => {
   // ********************
   // * Marker
   // ********************
-  const [marker, setMarker] = useState<Marker>();
+  const [marker, setMarker] = useState<ExtendedMarker>();
+
+  // use a ref for overlayToolBox to avoid re-subscribing
+  // interaction listeners on every change
+  const overlayToolBoxRef = useRef(overlayToolBox);
+  useEffect(() => {
+    overlayToolBoxRef.current = overlayToolBox;
+  }, [overlayToolBox]);
 
   const selectMarker = useCallback((λ: number, φ: number) => {
-    setMarker({ lon: λ, lat: φ });
+    if (!overlayToolBoxRef.current) setMarker(undefined);
+    else {
+      const newMarker = getMarkerData(λ, φ, overlayToolBoxRef.current);
+      setMarker(newMarker);
+    }
   }, []);
 
   const removeMarker = useCallback(() => {
@@ -69,7 +83,10 @@ const EarthView = () => {
         selectMarker={selectMarker}
         removeMarker={removeMarker}
       />
-      <EarthMenu config={config} setConfig={setConfig} />
+      <div className="floating-panels">
+        <MarkerPanel marker={marker} removeMarker={removeMarker} />
+        <EarthMenu config={config} setConfig={setConfig} />
+      </div>
     </div>
   );
 };
