@@ -16,6 +16,13 @@ import { getMarkerData } from "./utils/utils";
 
 const globeController = new GlobeController();
 
+const ErrorMessageNotice = () => (
+  <div className="error-notice">
+    <h2>Invalid configuration</h2>
+    <p>No data available for this configuration.</p>
+  </div>
+);
+
 const EarthView = () => {
   const [coastlines, setCoastlines] = useState<FeatureCollection<Geometry>>();
   const [config, setConfig] = useState(DEFAULT_CONFIG);
@@ -77,13 +84,15 @@ const EarthView = () => {
         coastlines={coastlines}
         globeController={globeController}
         projection={config.projection}
-        overlayToolBox={overlayToolBox}
+        overlayToolBox={overlayToolBox ?? null}
         getColor={getColor}
         streamInterpolate={streamInterpolate}
         marker={marker}
         selectMarker={selectMarker}
         removeMarker={removeMarker}
-      />
+      >
+        {overlayToolBox === null && <ErrorMessageNotice />}
+      </Earth>
       <div className="floating-panels">
         <MarkerPanel marker={marker} removeMarker={removeMarker} />
         <EarthMenu config={config} setConfig={setConfig} />
