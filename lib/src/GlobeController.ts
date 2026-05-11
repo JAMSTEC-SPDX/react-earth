@@ -16,6 +16,8 @@ type GlobeListener = {
   updateLayout: () => void;
   /** reset the vector animator once the movement is over */
   resetVectorAnimator: () => void;
+  /** used to handle marker if needed */
+  handleClick: (e: MouseEvent) => void;
 };
 
 export default class GlobeController {
@@ -47,13 +49,15 @@ export default class GlobeController {
   private sensitivity = 0;
   private initialRotation: [number, number] = [0, 0];
   private isDragging = false;
+  private draggingGlobe: GlobeListener | undefined = undefined;
 
-  handleMouseDown = () => (e: MouseEvent) => {
+  handleMouseDown = (globe: GlobeListener) => (e: MouseEvent) => {
     this.startMouse = [e.clientX, e.clientY];
     this.startScale = this.scale;
     this.sensitivity = 60 / this.startScale;
     this.initialRotation = [...this.rotation];
     this.isDragging = false;
+    this.draggingGlobe = globe;
 
     window.addEventListener("mousemove", this.handleMouseMove);
     window.addEventListener("mouseup", this.handleMouseUp);
@@ -80,8 +84,14 @@ export default class GlobeController {
     ]);
   };
 
-  handleMouseUp = () => {
+  handleMouseUp = (e: MouseEvent) => {
     this.startMouse = null;
+
+    if (!this.isDragging) {
+      this.draggingGlobe?.handleClick(e);
+    }
+
+    this.draggingGlobe = undefined;
 
     window.removeEventListener("mousemove", this.handleMouseMove);
     window.removeEventListener("mouseup", this.handleMouseUp);
@@ -110,7 +120,7 @@ export default class GlobeController {
   ) {
     this.listeners.add(listener);
 
-    const mouseDownHandler = this.handleMouseDown();
+    const mouseDownHandler = this.handleMouseDown(listener);
 
     const globeSvg = globeSvgRef.current;
     if (globeSvg) {

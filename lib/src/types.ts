@@ -6,6 +6,11 @@ export type Vector = [number, number];
 
 export type Projection = "ortho" | "equirectangular";
 
+export type Marker = {
+  lat: number;
+  lon: number;
+};
+
 // ******************
 // * View types     *
 // ******************
