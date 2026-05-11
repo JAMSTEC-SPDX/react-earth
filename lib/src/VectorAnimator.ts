@@ -25,6 +25,7 @@ type MovingParticle = Particle & { index: number; xt: number; yt: number };
 /** Animates a vector field at a given instant, which represent physical flows such as wind or currents */
 export class VectorAnimator {
   private ctx: CanvasRenderingContext2D;
+  private view: View;
   private viewBounds: ViewBounds;
   private animationId: number | null = null;
   private cancel = false;
@@ -50,6 +51,7 @@ export class VectorAnimator {
         NULL_VECTOR
       );
     };
+    this.view = view;
     this.viewBounds = getBounds(view, projection);
     this.options = options;
   }
@@ -173,11 +175,15 @@ export class VectorAnimator {
     this.animationId = requestAnimationFrame(this.frame);
   }
 
-  stop(view: View) {
+  updateView(view: View) {
+    this.view = view;
+  }
+
+  stop() {
     if (this.animationId) {
       this.cancel = true;
       cancelAnimationFrame(this.animationId);
-      this.ctx.clearRect(0, 0, view.width, view.height);
+      this.ctx.clearRect(0, 0, this.view.width, this.view.height);
     }
   }
 }
