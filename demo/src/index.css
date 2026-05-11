@@ -51,6 +51,25 @@ body {
   pointer-events: none;
 }
 
+.error-notice {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  background: #111;
+  color: #ff6b6b;
+
+  padding: 16px 24px;
+  border-radius: 8px;
+
+  border: 1px solid #333;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+
+  font-size: 14px;
+  text-align: center;
+}
+
 /**************************************************************************************************
  * MARKER PANEL
  **************************************************************************************************/

@@ -103,9 +103,10 @@ function parseRawData(
 // **************************
 
 export default function useDataToolBox(param: FieldType) {
+  // overlayToolBox is undefined before the initial load and becomes null when no data is available.
   const [overlayToolBox, setOverlayToolBox] = useState<
     ExtendedOverlayToolBox<Vector> | ExtendedOverlayToolBox<number> | null
-  >(null);
+  >();
   const [streamInterpolate, setStreamInterpolate] = useState<
     ((λ: number, φ: number) => Vector | null) | null
   >(null);
