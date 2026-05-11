@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, type PropsWithChildren } from "react";
 
 import type { FeatureCollection, Geometry } from "geojson";
 
@@ -14,7 +14,7 @@ import { useView } from "./utils/view";
 import "./styles.css";
 import { VectorAnimator } from "./VectorAnimator";
 
-type EarthProps = {
+type EarthProps = PropsWithChildren<{
   coastlines?: FeatureCollection<Geometry>;
   globeController: GlobeController;
   projection: Projection;
@@ -24,7 +24,7 @@ type EarthProps = {
   marker?: Marker;
   selectMarker?: (λ: number, φ: number) => void;
   removeMarker?: () => void;
-};
+}>;
 
 const Earth = ({
   coastlines,
@@ -36,6 +36,7 @@ const Earth = ({
   marker,
   selectMarker,
   removeMarker,
+  children,
 }: EarthProps) => {
   const earthRoot = useRef<HTMLDivElement | null>(null);
   const globeSvgRef = useRef<SVGSVGElement | null>(null);
@@ -271,6 +272,7 @@ const Earth = ({
         width={view.width}
         height={view.height}
       />
+      {children}
     </div>
   );
 };
