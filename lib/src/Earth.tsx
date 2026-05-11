@@ -4,7 +4,7 @@ import type { FeatureCollection, Geometry } from "geojson";
 
 import { TRANSPARENT_BLACK } from "./consts";
 import GlobeController from "./GlobeController";
-import type { OverlayToolBox, Projection, Vector } from "./types";
+import type { OverlayToolBox, Projection, Vector, View } from "./types";
 import useOverlayController from "./useOverlayController";
 import useSvgController from "./useSvgController";
 import applyProjectionToVectorField from "./utils/applyProjectionToVectorField";
@@ -49,9 +49,16 @@ const Earth = ({
   const scaleRef = useRef(globeController.scale);
 
   const view = useView(earthRoot);
-
   const svgController = useSvgController(globeSvgRef);
   const overlayController = useOverlayController(overlayCanvasRef);
+
+  // introduce some ref to avoid re-subscribing interaction listeners on every change
+  const viewRef = useRef<View>({ width: 1, height: 1 });
+  viewRef.current = view;
+  const projectionRef = useRef<Projection>(projection);
+  projectionRef.current = projection;
+  const streamInterpolateRef = useRef(streamInterpolate);
+  streamInterpolateRef.current = streamInterpolate;
 
   useEffect(() => {
     if (svgController && coastlines) {
@@ -64,31 +71,36 @@ const Earth = ({
   // *******************
   const resetVectorAnimator = useCallback(() => {
     // clear previous canvas
-    vectorAnimatorRef.current?.stop(view);
+    vectorAnimatorRef.current?.stop();
 
     const animationCtx = vectorCanvasRef.current?.getContext("2d");
-    if (!streamInterpolate || !animationCtx) return;
+    if (!streamInterpolateRef.current || !animationCtx) return;
 
     // rotate and scale projection, then compute vector field
-    const p = createProjection(view, projection);
+    const p = createProjection(viewRef.current, projectionRef.current);
     p.rotate([...rotationRef.current, 0]).scale(scaleRef.current);
 
     const vectorField = applyProjectionToVectorField(
-      streamInterpolate,
+      streamInterpolateRef.current,
       p,
-      projection,
-      view,
+      projectionRef.current,
+      viewRef.current,
     );
 
     // animate vector particles
-    const animator = new VectorAnimator(animationCtx, vectorField, view, p);
+    const animator = new VectorAnimator(
+      animationCtx,
+      vectorField,
+      viewRef.current,
+      p,
+    );
     vectorAnimatorRef.current = animator;
     animator.start();
 
     return () => {
-      animator.stop(view);
+      animator.stop();
     };
-  }, [streamInterpolate, projection, view]);
+  }, []);
 
   // ********************
   // * First render     *
@@ -164,6 +176,7 @@ const Earth = ({
       rotationRef.current,
       scaleRef.current,
     );
+    vectorAnimatorRef.current?.updateView(view);
     resetVectorAnimator();
   }, [projection, view]);
 
@@ -175,14 +188,14 @@ const Earth = ({
 
     const updateLayout = () => {
       // clear animation before dragging or zooming
-      vectorAnimatorRef.current?.stop(view);
+      vectorAnimatorRef.current?.stop();
 
       rotationRef.current = globeController.rotation;
       scaleRef.current = globeController.scale;
 
       svgController.updateProjection(scaleRef.current, rotationRef.current);
       overlayController?.drawOverlay(
-        projection,
+        projectionRef.current,
         rotationRef.current,
         scaleRef.current,
       );
@@ -194,7 +207,7 @@ const Earth = ({
     });
 
     return () => unsubscribeGlobeController();
-  }, [svgController, resetVectorAnimator]);
+  }, [svgController]);
 
   return (
     <div ref={earthRoot} className="earth-root">
