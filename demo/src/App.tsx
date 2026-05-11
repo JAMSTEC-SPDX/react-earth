@@ -56,6 +56,7 @@ const EarthView = () => {
   const overlayToolBoxRef = useRef(overlayToolBox);
   useEffect(() => {
     overlayToolBoxRef.current = overlayToolBox;
+    if (!overlayToolBox) setMarker(undefined);
   }, [overlayToolBox]);
 
   const selectMarker = useCallback((λ: number, φ: number) => {
