@@ -20,7 +20,7 @@ const EarthView = () => {
   const [coastlines, setCoastlines] = useState<FeatureCollection<Geometry>>();
   const [config, setConfig] = useState(DEFAULT_CONFIG);
 
-  const { overlayToolBox, streamInterpolate } = useDataToolBox("wind");
+  const { overlayToolBox, streamInterpolate } = useDataToolBox(config.param);
 
   const getColor = useMemo(
     () => getColorScale(overlayToolBox?.dataType || "wind"),
