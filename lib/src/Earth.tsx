@@ -200,10 +200,10 @@ const Earth = ({
       const x = event.clientX - rect.left;
       const y = event.clientY - rect.top;
 
-      const p = createProjection(view, projection);
+      const p = createProjection(viewRef.current, projection);
       p.rotate([...rotationRef.current, 0]).scale(scaleRef.current);
 
-      if (!isInsideCircle(view, p, x, y)) removeMarker();
+      if (!isInsideCircle(viewRef.current, p, x, y)) removeMarker();
       else {
         // update marker
         const coords = p.invert!([x, y]);
