@@ -70,9 +70,15 @@ const Earth = ({
 
   useEffect(() => {
     if (svgController && coastlines) {
+      svgController.changeProjection(
+        view,
+        projection,
+        scaleRef.current,
+        rotationRef.current,
+      );
       svgController.updateCoastlines(coastlines);
     }
-  }, [coastlines]);
+  }, [svgController, coastlines]);
 
   // *******************
   // * Vector animator *
