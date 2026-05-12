@@ -144,7 +144,13 @@ const App = () => {
   }, []);
 
   return (
-    <div className="main-page">
+    <div
+      className="main-page"
+      style={{
+        flexDirection:
+          config.projection === "equirectangular" ? "column" : "row",
+      }}
+    >
       <EarthView
         coastlines={coastlines}
         config={config}

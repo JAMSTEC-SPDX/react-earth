@@ -68,6 +68,11 @@ const EarthMenu = ({
 }: EarthMenuProps) => {
   const [open, setOpen] = useState(false);
 
+  const isMainMenu =
+    (config.projection === "ortho" && !isSecondary) ||
+    (config.projection === "equirectangular" &&
+      (!config.compareMode || isSecondary));
+
   const paramKey = useMemo(
     () => (!isSecondary ? "param1" : "param2"),
     [isSecondary],
@@ -219,18 +224,22 @@ const EarthMenu = ({
             />
           </div>
         </div>
-        <MenuRow
-          setting="projection"
-          options={["ortho", "equirectangular"]}
-          selected={config.projection}
-          onClick={(option: string) => updateConfig("projection", option)}
-        />
-        <MenuRow
-          setting="mode"
-          options={["compare", "single"]}
-          selected={config.compareMode ? "compare" : "single"}
-          onClick={(option: string) => updateConfig("compareMode", option)}
-        />
+        {isMainMenu && (
+          <>
+            <MenuRow
+              setting="projection"
+              options={["ortho", "equirectangular"]}
+              selected={config.projection}
+              onClick={(option: string) => updateConfig("projection", option)}
+            />
+            <MenuRow
+              setting="mode"
+              options={["compare", "single"]}
+              selected={config.compareMode ? "compare" : "single"}
+              onClick={(option: string) => updateConfig("compareMode", option)}
+            />
+          </>
+        )}
       </div>
       <button
         className="menu-toggle"
