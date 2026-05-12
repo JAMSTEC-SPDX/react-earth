@@ -2,6 +2,7 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type ChangeEvent,
@@ -52,6 +53,7 @@ type EarthMenuProps = {
   config: Config;
   validConfig: boolean;
   colorScaleBounds: ColorScaleBounds;
+  isSecondary: boolean;
   setConfig: Dispatch<SetStateAction<Config>>;
   updateColorScaleBounds: Dispatch<SetStateAction<ColorScaleBounds>>;
 };
@@ -60,10 +62,16 @@ const EarthMenu = ({
   config,
   validConfig,
   colorScaleBounds,
+  isSecondary = false,
   setConfig,
   updateColorScaleBounds,
 }: EarthMenuProps) => {
   const [open, setOpen] = useState(false);
+
+  const paramKey = useMemo(
+    () => (!isSecondary ? "param1" : "param2"),
+    [isSecondary],
+  );
 
   const toggleMenu = () => {
     setOpen(!open);
@@ -74,13 +82,18 @@ const EarthMenu = ({
       if (option === "ortho" || option === "equirectangular") {
         setConfig((prev) => ({ ...prev, projection: option }));
       }
+    } else if (configKey === "compareMode") {
+      setConfig((prev) => ({
+        ...prev,
+        compareMode: option === "compare" ? true : false,
+      }));
     } else {
       if (
         option === "wind" ||
         option === "current" ||
         option === "temperature"
       ) {
-        setConfig((prev) => ({ ...prev, param: option }));
+        setConfig((prev) => ({ ...prev, [paramKey]: option }));
       }
     }
   };
@@ -158,7 +171,7 @@ const EarthMenu = ({
       return;
     }
 
-    const getColor = getColorScale(config.param, colorScaleBounds);
+    const getColor = getColorScale(config[paramKey], colorScaleBounds);
     const { lowerBound, upperBound } = colorScaleBounds;
 
     // redraw the color scale (use canvas internal width & height)
@@ -169,7 +182,7 @@ const EarthMenu = ({
       ctx.fillStyle = "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")";
       ctx.fillRect(i, 0, 1, colorBar.height);
     }
-  }, [colorScaleWidth, colorScaleBounds, config.param, validConfig]);
+  }, [colorScaleWidth, colorScaleBounds, config, paramKey, validConfig]);
 
   return (
     <>
@@ -177,8 +190,10 @@ const EarthMenu = ({
         <MenuRow
           setting="overlay"
           options={["wind", "current", "temperature"]}
-          selected={config.param}
-          onClick={(option: string) => updateConfig("param", option)}
+          selected={config[paramKey]}
+          onClick={(option: string) =>
+            updateConfig(!isSecondary ? "param1" : "param2", option)
+          }
         />
         <div ref={colorScaleRow} className="setting-row">
           <div className="setting-label">scale</div>
@@ -209,6 +224,12 @@ const EarthMenu = ({
           options={["ortho", "equirectangular"]}
           selected={config.projection}
           onClick={(option: string) => updateConfig("projection", option)}
+        />
+        <MenuRow
+          setting="mode"
+          options={["compare", "single"]}
+          selected={config.compareMode ? "compare" : "single"}
+          onClick={(option: string) => updateConfig("compareMode", option)}
         />
       </div>
       <button

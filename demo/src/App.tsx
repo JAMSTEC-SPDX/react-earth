@@ -33,17 +33,27 @@ const ErrorMessageNotice = () => (
 
 type EarthViewProps = {
   coastlines?: FeatureCollection<Geometry>;
+  isSecondary?: boolean;
   config: Config;
   setConfig: Dispatch<SetStateAction<Config>>;
 };
 
-const EarthView = ({ coastlines, config, setConfig }: EarthViewProps) => {
+const EarthView = ({
+  coastlines,
+  config,
+  setConfig,
+  isSecondary = false,
+}: EarthViewProps) => {
   const [colorScaleBounds, setColorScaleBounds] = useState<ColorScaleBounds>({
     lowerBound: 0,
     upperBound: 1,
   });
 
-  const { overlayToolBox, streamInterpolate } = useDataToolBox(config.param);
+  const param = useMemo(
+    () => config[!isSecondary ? "param1" : "param2"],
+    [isSecondary, config],
+  );
+  const { overlayToolBox, streamInterpolate } = useDataToolBox(param);
 
   const getColor = useMemo(() => {
     const fieldType = overlayToolBox?.dataType || "wind";
@@ -51,9 +61,9 @@ const EarthView = ({ coastlines, config, setConfig }: EarthViewProps) => {
   }, [overlayToolBox?.dataType, colorScaleBounds]);
 
   useEffect(() => {
-    const newColorScaleBounds = getColorScaleBounds(config.param);
+    const newColorScaleBounds = getColorScaleBounds(param);
     setColorScaleBounds(newColorScaleBounds);
-  }, [config.param]);
+  }, [param]);
 
   // ********************
   // * Marker
@@ -102,6 +112,7 @@ const EarthView = ({ coastlines, config, setConfig }: EarthViewProps) => {
           setConfig={setConfig}
           validConfig={overlayToolBox !== null}
           colorScaleBounds={colorScaleBounds}
+          isSecondary={isSecondary}
           updateColorScaleBounds={setColorScaleBounds}
         />
       </div>
@@ -139,6 +150,14 @@ const App = () => {
         config={config}
         setConfig={setConfig}
       />
+      {config.compareMode && (
+        <EarthView
+          coastlines={coastlines}
+          config={config}
+          setConfig={setConfig}
+          isSecondary
+        />
+      )}
     </div>
   );
 };
