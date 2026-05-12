@@ -7,6 +7,7 @@
     "demo"
   ],
   "scripts": {
+    "dev": "concurrently -n LIB,DEMO -c blue,green \"npm run watch --workspace=lib\" \"npm run start --workspace=react-earth-demo\"",
     "typecheck": "tsc --noEmit -p demo/tsconfig.app.json && tsc --noEmit -p lib/tsconfig.json",
     "lint": "eslint . --fix",
     "lint:check": "eslint .",
@@ -15,6 +16,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "concurrently": "^9.2.1",
     "eslint": "^9.39.4",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
