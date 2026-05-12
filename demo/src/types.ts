@@ -11,6 +11,11 @@ export type ColorScaleBounds = {
   upperBound: number;
 };
 
+export type ColorScaleBoundsInput = {
+  lowerBound: string;
+  upperBound: string;
+};
+
 // ******************
 // * Data types     *
 // ******************

@@ -9,7 +9,7 @@ import type { Topology } from "topojson-specification";
 import { DEFAULT_CONFIG } from "./consts";
 import EarthMenu from "./EarthMenu";
 import MarkerPanel from "./MarkerPanel";
-import type { ExtendedMarker } from "./types";
+import type { ColorScaleBounds, ExtendedMarker } from "./types";
 import useDataToolBox from "./useDataToolBox";
 import { getColorScale, getColorScaleBounds } from "./utils/fieldTypes";
 import { getMarkerData } from "./utils/utils";
@@ -26,14 +26,17 @@ const ErrorMessageNotice = () => (
 const EarthView = () => {
   const [coastlines, setCoastlines] = useState<FeatureCollection<Geometry>>();
   const [config, setConfig] = useState(DEFAULT_CONFIG);
+  const [colorScaleBounds, setColorScaleBounds] = useState<ColorScaleBounds>({
+    lowerBound: 0,
+    upperBound: 1,
+  });
 
   const { overlayToolBox, streamInterpolate } = useDataToolBox(config.param);
 
   const getColor = useMemo(() => {
     const fieldType = overlayToolBox?.dataType || "wind";
-    const colorScaleBounds = getColorScaleBounds(fieldType);
     return getColorScale(fieldType, colorScaleBounds);
-  }, [overlayToolBox?.dataType]);
+  }, [overlayToolBox?.dataType, colorScaleBounds]);
 
   useEffect(() => {
     const fetchTopology = async () => {
@@ -53,6 +56,11 @@ const EarthView = () => {
 
     fetchTopology();
   }, []);
+
+  useEffect(() => {
+    const newColorScaleBounds = getColorScaleBounds(config.param);
+    setColorScaleBounds(newColorScaleBounds);
+  }, [config.param]);
 
   // ********************
   // * Marker
@@ -100,6 +108,8 @@ const EarthView = () => {
           config={config}
           setConfig={setConfig}
           validConfig={overlayToolBox !== null}
+          colorScaleBounds={colorScaleBounds}
+          updateColorScaleBounds={setColorScaleBounds}
         />
       </div>
     </div>
