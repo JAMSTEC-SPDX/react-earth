@@ -2,7 +2,7 @@
 
 This project is a React and TypeScript reimplementation of the brilliant [Cambecc/earth](https://github.com/cambecc/earth) project created by Cameron Beccario.
 
-![demo](https://github.com/JAMSTEC-SPDX/react-earth/main/docs/demo.gif)
+![demo](./docs/demo.gif)
 
 The data visualization logic remains largely the same and relies on SVG/D3, WebGL and canvas for rendering.
 
