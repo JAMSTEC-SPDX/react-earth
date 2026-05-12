@@ -3,6 +3,23 @@
 This demo showcases a practical example of how to use the **react-earth** library,
 a React-based solution for rendering interactive globe visualizations.
 
+## Features
+
+- Orthographic and equirectangular projections
+- Overlay rendering from scalar and vector fields
+- Particle-based vector field animation
+- SVG coastlines and graticules
+- Interactive globe rotation and zoom (with support for synchronized globes)
+- Marker support
+- Compare mode
+
+Feel free to reuse and customize this demo project. Here are a few examples of what can be done:
+
+- customize the Earth menu
+- add new datasets or supported fields (currently wind, currents, and temperature)
+- customize the color scales
+- display multiple synchronized globes side by side
+
 ## Map data
 
 Map data is sourced from [Natural Earth](https://www.naturalearthdata.com/) and needs
