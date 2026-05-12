@@ -1,8 +1,18 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 
-import type { Config } from "./types";
-import { getColorScale, getColorScaleBounds } from "./utils/fieldTypes";
-import { linearInterpolate } from "./utils/maths";
+import type { ColorScaleBounds, ColorScaleBoundsInput, Config } from "./types";
+import { getColorScale } from "./utils/fieldTypes";
+import { linearInterpolate, roundToDecimal } from "./utils/maths";
+import { colorScaleBoundToInputs, useDebounceFunc } from "./utils/utils";
 
 type MenuRowProps = {
   setting: string;
@@ -40,11 +50,19 @@ const MenuRow = ({
 
 type EarthMenuProps = {
   config: Config;
-  setConfig: React.Dispatch<React.SetStateAction<Config>>;
   validConfig: boolean;
+  colorScaleBounds: ColorScaleBounds;
+  setConfig: Dispatch<SetStateAction<Config>>;
+  updateColorScaleBounds: Dispatch<SetStateAction<ColorScaleBounds>>;
 };
 
-const EarthMenu = ({ config, setConfig, validConfig }: EarthMenuProps) => {
+const EarthMenu = ({
+  config,
+  validConfig,
+  colorScaleBounds,
+  setConfig,
+  updateColorScaleBounds,
+}: EarthMenuProps) => {
   const [open, setOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -74,10 +92,48 @@ const EarthMenu = ({ config, setConfig, validConfig }: EarthMenuProps) => {
   const colorScaleRef = useRef<HTMLCanvasElement | null>(null);
   const [colorScaleWidth, setColorScaleWidth] = useState(200);
 
-  const colorScaleBounds = useMemo(
-    () => getColorScaleBounds(config.param),
-    [config.param],
+  const [tmpColorScaleBounds, setTmpColorScaleBounds] =
+    useState<ColorScaleBoundsInput>(colorScaleBoundToInputs(colorScaleBounds));
+
+  const debouncedUpdate = useCallback(
+    (newColorScaleBound: ColorScaleBoundsInput) => {
+      const lower = parseFloat(newColorScaleBound.lowerBound);
+      const upper = parseFloat(newColorScaleBound.upperBound);
+      if (!Number.isNaN(lower) && !Number.isNaN(upper)) {
+        updateColorScaleBounds({
+          lowerBound: roundToDecimal(lower),
+          upperBound: roundToDecimal(upper),
+        });
+      }
+    },
+    [updateColorScaleBounds],
   );
+  useDebounceFunc(tmpColorScaleBounds, debouncedUpdate, 500);
+
+  const handleColorScaleBoundChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    key: "lowerBound" | "upperBound",
+  ) => {
+    setTmpColorScaleBounds((prev) => ({ ...prev, [key]: e.target.value }));
+  };
+
+  useEffect(() => {
+    if (!validConfig) {
+      setTmpColorScaleBounds({
+        lowerBound: "-",
+        upperBound: "-",
+      });
+    } else {
+      const newInputs = colorScaleBoundToInputs(colorScaleBounds);
+      if (
+        newInputs.lowerBound !== tmpColorScaleBounds.lowerBound ||
+        newInputs.upperBound !== tmpColorScaleBounds.upperBound
+      ) {
+        setTmpColorScaleBounds(newInputs);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [colorScaleBounds, validConfig]);
 
   useLayoutEffect(() => {
     if (colorScaleRow.current && open) {
@@ -131,8 +187,9 @@ const EarthMenu = ({ config, setConfig, validConfig }: EarthMenuProps) => {
             <input
               className="color-scale-input"
               type="text"
-              value={validConfig ? colorScaleBounds.lowerBound : "-"}
-              disabled
+              value={tmpColorScaleBounds.lowerBound}
+              onChange={(e) => handleColorScaleBoundChange(e, "lowerBound")}
+              disabled={!validConfig}
             />
             <canvas
               ref={colorScaleRef}
@@ -141,8 +198,9 @@ const EarthMenu = ({ config, setConfig, validConfig }: EarthMenuProps) => {
             <input
               type="text"
               className="color-scale-input"
-              value={validConfig ? colorScaleBounds.upperBound : "-"}
-              disabled
+              value={tmpColorScaleBounds.upperBound}
+              onChange={(e) => handleColorScaleBoundChange(e, "upperBound")}
+              disabled={!validConfig}
             />
           </div>
         </div>

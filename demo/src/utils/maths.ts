@@ -21,3 +21,7 @@ export function magnitude(vector: Vector) {
   const [u, v] = vector;
   return Math.sqrt(u * u + v * v);
 }
+
+export function roundToDecimal(num: number) {
+  return Math.round(num * 10) / 10;
+}
