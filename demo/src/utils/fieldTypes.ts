@@ -19,32 +19,37 @@ export function isScalar(fieldType: FieldType) {
   }
 }
 
+export function getColorScaleBounds(fieldType: FieldType) {
+  switch (fieldType) {
+    case "wind":
+      return { lowerBound: WIND_LOWER_BOUND, upperBound: WIND_UPPER_BOUND };
+    case "temperature":
+      return { lowerBound: TEMP_LOWER_BOUND, upperBound: TEMP_UPPER_BOUND };
+    case "current":
+      return {
+        lowerBound: CURRENT_LOWER_BOUND,
+        upperBound: CURRENT_UPPER_BOUND,
+      };
+    default:
+      throw new Error(`Field type ${fieldType} not handled`);
+  }
+}
+
 export function getColorScale(
   fieldType: FieldType,
+  colorScaleBounds: ColorScaleBounds,
 ): (value: number, alpha?: number) => RGBAColor {
   let colorSegments: ColorSegment[];
   switch (fieldType) {
     case "wind": {
-      const colorScaleBounds = {
-        lowerBound: WIND_LOWER_BOUND,
-        upperBound: WIND_UPPER_BOUND,
-      };
       colorSegments = getWindColorScale(colorScaleBounds);
       break;
     }
     case "temperature": {
-      const colorScaleBounds = {
-        lowerBound: TEMP_LOWER_BOUND,
-        upperBound: TEMP_UPPER_BOUND,
-      };
       colorSegments = getTemperatureColorScale(colorScaleBounds);
       break;
     }
     case "current": {
-      const colorScaleBounds = {
-        lowerBound: CURRENT_LOWER_BOUND,
-        upperBound: CURRENT_UPPER_BOUND,
-      };
       colorSegments = getCurrentColorScale(colorScaleBounds);
       break;
     }

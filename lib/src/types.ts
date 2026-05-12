@@ -11,6 +11,11 @@ export type Marker = {
   lon: number;
 };
 
+export type ColorScaleBounds = {
+  lowerBound: number;
+  upperBound: number;
+};
+
 // ******************
 // * View types     *
 // ******************

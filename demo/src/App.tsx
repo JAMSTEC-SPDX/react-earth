@@ -11,7 +11,7 @@ import EarthMenu from "./EarthMenu";
 import MarkerPanel from "./MarkerPanel";
 import type { ExtendedMarker } from "./types";
 import useDataToolBox from "./useDataToolBox";
-import { getColorScale } from "./utils/fieldTypes";
+import { getColorScale, getColorScaleBounds } from "./utils/fieldTypes";
 import { getMarkerData } from "./utils/utils";
 
 const globeController = new GlobeController();
@@ -29,10 +29,11 @@ const EarthView = () => {
 
   const { overlayToolBox, streamInterpolate } = useDataToolBox(config.param);
 
-  const getColor = useMemo(
-    () => getColorScale(overlayToolBox?.dataType || "wind"),
-    [overlayToolBox?.dataType],
-  );
+  const getColor = useMemo(() => {
+    const fieldType = overlayToolBox?.dataType || "wind";
+    const colorScaleBounds = getColorScaleBounds(fieldType);
+    return getColorScale(fieldType, colorScaleBounds);
+  }, [overlayToolBox?.dataType]);
 
   useEffect(() => {
     const fetchTopology = async () => {
@@ -95,7 +96,11 @@ const EarthView = () => {
       </Earth>
       <div className="floating-panels">
         <MarkerPanel marker={marker} removeMarker={removeMarker} />
-        <EarthMenu config={config} setConfig={setConfig} />
+        <EarthMenu
+          config={config}
+          setConfig={setConfig}
+          validConfig={overlayToolBox !== null}
+        />
       </div>
     </div>
   );
