@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 
 import type { FeatureCollection, Geometry } from "geojson";
 import Earth, { GlobeController } from "react-earth";
@@ -9,7 +17,7 @@ import type { Topology } from "topojson-specification";
 import { DEFAULT_CONFIG } from "./consts";
 import EarthMenu from "./EarthMenu";
 import MarkerPanel from "./MarkerPanel";
-import type { ColorScaleBounds, ExtendedMarker } from "./types";
+import type { ColorScaleBounds, Config, ExtendedMarker } from "./types";
 import useDataToolBox from "./useDataToolBox";
 import { getColorScale, getColorScaleBounds } from "./utils/fieldTypes";
 import { getMarkerData } from "./utils/utils";
@@ -23,9 +31,13 @@ const ErrorMessageNotice = () => (
   </div>
 );
 
-const EarthView = () => {
-  const [coastlines, setCoastlines] = useState<FeatureCollection<Geometry>>();
-  const [config, setConfig] = useState(DEFAULT_CONFIG);
+type EarthViewProps = {
+  coastlines?: FeatureCollection<Geometry>;
+  config: Config;
+  setConfig: Dispatch<SetStateAction<Config>>;
+};
+
+const EarthView = ({ coastlines, config, setConfig }: EarthViewProps) => {
   const [colorScaleBounds, setColorScaleBounds] = useState<ColorScaleBounds>({
     lowerBound: 0,
     upperBound: 1,
@@ -37,25 +49,6 @@ const EarthView = () => {
     const fieldType = overlayToolBox?.dataType || "wind";
     return getColorScale(fieldType, colorScaleBounds);
   }, [overlayToolBox?.dataType, colorScaleBounds]);
-
-  useEffect(() => {
-    const fetchTopology = async () => {
-      const topo: Topology = await fetch("/earth-topo.json").then((r) =>
-        r.json(),
-      );
-      const coastlines = feature(topo, topo.objects.coastlines);
-      setCoastlines(
-        "features" in coastlines
-          ? coastlines
-          : {
-              type: "FeatureCollection",
-              features: [coastlines],
-            },
-      );
-    };
-
-    fetchTopology();
-  }, []);
 
   useEffect(() => {
     const newColorScaleBounds = getColorScaleBounds(config.param);
@@ -88,7 +81,7 @@ const EarthView = () => {
   }, []);
 
   return (
-    <div className="main-page">
+    <div className="earth-view">
       <Earth
         coastlines={coastlines}
         globeController={globeController}
@@ -116,4 +109,38 @@ const EarthView = () => {
   );
 };
 
-export default EarthView;
+const App = () => {
+  const [coastlines, setCoastlines] = useState<FeatureCollection<Geometry>>();
+  const [config, setConfig] = useState(DEFAULT_CONFIG);
+
+  useEffect(() => {
+    const fetchTopology = async () => {
+      const topo: Topology = await fetch("/earth-topo.json").then((r) =>
+        r.json(),
+      );
+      const coastlines = feature(topo, topo.objects.coastlines);
+      setCoastlines(
+        "features" in coastlines
+          ? coastlines
+          : {
+              type: "FeatureCollection",
+              features: [coastlines],
+            },
+      );
+    };
+
+    fetchTopology();
+  }, []);
+
+  return (
+    <div className="main-page">
+      <EarthView
+        coastlines={coastlines}
+        config={config}
+        setConfig={setConfig}
+      />
+    </div>
+  );
+};
+
+export default App;
