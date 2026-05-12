@@ -1,5 +1,6 @@
 {
   "name": "react-earth-project",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "workspaces": [

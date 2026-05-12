@@ -1,6 +1,7 @@
 {
   "name": "react-earth",
   "version": "0.0.1-dev",
+  "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
