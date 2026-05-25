@@ -126,9 +126,9 @@ const App = () => {
 
   useEffect(() => {
     const fetchTopology = async () => {
-      const topo: Topology = await fetch("/earth-topo.json").then((r) =>
-        r.json(),
-      );
+      const topo: Topology = await fetch(
+        `${import.meta.env.BASE_URL}/earth-topo.json`,
+      ).then((r) => r.json());
       const coastlines = feature(topo, topo.objects.coastlines);
       setCoastlines(
         "features" in coastlines

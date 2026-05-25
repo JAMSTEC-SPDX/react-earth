@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "dev": "concurrently -n LIB,DEMO -c blue,green \"npm run watch --workspace=lib\" \"npm run start --workspace=react-earth-demo\"",
+    "build": "npm run build --workspace=lib && npm run build --workspace=react-earth-demo",
     "typecheck": "tsc --noEmit -p demo/tsconfig.app.json && tsc --noEmit -p lib/tsconfig.json",
     "lint": "eslint . --fix",
     "lint:check": "eslint .",

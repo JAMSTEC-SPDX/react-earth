@@ -20,6 +20,16 @@ Feel free to reuse and customize this demo project. Here are a few examples of w
 - customize the color scales
 - display multiple synchronized globes side by side
 
+## Climatic data
+
+For demonstration purposes, the application provides two arbitrary climatic datasets:
+
+- a wind vector field dataset,
+- a temperature scalar field dataset.
+
+These datasets are only intended to showcase the visualization capabilities of the application
+and do not represent real scientific observations or forecasts.
+
 ## Map data
 
 Map data is sourced from [Natural Earth](https://www.naturalearthdata.com/) and needs
