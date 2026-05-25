@@ -17,7 +17,7 @@ type GlobeListener = {
   /** reset the vector animator once the movement is over */
   resetVectorAnimator: () => void;
   /** used to handle marker if needed */
-  handleClick: (e: MouseEvent) => void;
+  handleClick: (e: PointerEvent) => void;
 };
 
 export default class GlobeController {
@@ -51,7 +51,7 @@ export default class GlobeController {
   private isDragging = false;
   private draggingGlobe: GlobeListener | undefined = undefined;
 
-  handleMouseDown = (globe: GlobeListener) => (e: MouseEvent) => {
+  handlePointerDown = (globe: GlobeListener) => (e: PointerEvent) => {
     this.startMouse = [e.clientX, e.clientY];
     this.startScale = this.scale;
     this.sensitivity = 60 / this.startScale;
@@ -59,11 +59,11 @@ export default class GlobeController {
     this.isDragging = false;
     this.draggingGlobe = globe;
 
-    window.addEventListener("mousemove", this.handleMouseMove);
-    window.addEventListener("mouseup", this.handleMouseUp);
+    window.addEventListener("pointermove", this.handlePointerMove);
+    window.addEventListener("pointerup", this.handlePointerUp);
   };
 
-  handleMouseMove = (e: MouseEvent) => {
+  handlePointerMove = (e: PointerEvent) => {
     if (!this.startMouse) return;
 
     // The Y delta is inverted because screen coordinates increase downward,
@@ -84,7 +84,7 @@ export default class GlobeController {
     ]);
   };
 
-  handleMouseUp = (e: MouseEvent) => {
+  handlePointerUp = (e: PointerEvent) => {
     this.startMouse = null;
 
     if (!this.isDragging) {
@@ -93,8 +93,8 @@ export default class GlobeController {
 
     this.draggingGlobe = undefined;
 
-    window.removeEventListener("mousemove", this.handleMouseMove);
-    window.removeEventListener("mouseup", this.handleMouseUp);
+    window.removeEventListener("pointermove", this.handlePointerMove);
+    window.removeEventListener("pointerup", this.handlePointerUp);
   };
 
   // **************
@@ -120,21 +120,21 @@ export default class GlobeController {
   ) {
     this.listeners.add(listener);
 
-    const mouseDownHandler = this.handleMouseDown(listener);
+    const pointerDownHandler = this.handlePointerDown(listener);
 
     const globeSvg = globeSvgRef.current;
     if (globeSvg) {
       globeSvg.addEventListener("wheel", this.handleWheel, { passive: false });
-      globeSvg.addEventListener("mousedown", mouseDownHandler);
+      globeSvg.addEventListener("pointerdown", pointerDownHandler);
     }
 
     return () => {
       this.listeners.delete(listener);
       if (globeSvg) {
         globeSvg.removeEventListener("wheel", this.handleWheel);
-        globeSvg.removeEventListener("mousedown", mouseDownHandler);
-        window.removeEventListener("mousemove", this.handleMouseMove);
-        window.removeEventListener("mouseup", this.handleMouseUp);
+        globeSvg.removeEventListener("pointerdown", pointerDownHandler);
+        window.removeEventListener("pointermove", this.handlePointerMove);
+        window.removeEventListener("pointerup", this.handlePointerUp);
       }
     };
   }
