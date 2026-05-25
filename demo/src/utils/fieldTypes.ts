@@ -2,7 +2,7 @@ import {
   getSegmentedColorScaleFunction,
   type ColorSegment,
   type RGBAColor,
-} from "react-earth";
+} from "jamstec-react-earth";
 
 import type { FieldType, ColorScaleBounds } from "../types";
 import { linearInterpolate } from "./maths";

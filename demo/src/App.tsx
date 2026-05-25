@@ -9,8 +9,8 @@ import {
 } from "react";
 
 import type { FeatureCollection, Geometry } from "geojson";
-import Earth, { GlobeController } from "react-earth";
-import "react-earth/dist/index.css";
+import Earth, { GlobeController } from "jamstec-react-earth";
+import "jamstec-react-earth/dist/index.css";
 import { feature } from "topojson-client";
 import type { Topology } from "topojson-specification";
 
