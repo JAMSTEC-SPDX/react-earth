@@ -1,4 +1,4 @@
-import type { Vector } from "react-earth";
+import type { Vector } from "jamstec-react-earth";
 
 /** Returns the positive modulo of a by n. */
 export function floorMod(a: number, n: number) {

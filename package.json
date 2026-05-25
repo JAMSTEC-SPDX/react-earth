@@ -1,5 +1,5 @@
 {
-  "name": "react-earth-project",
+  "name": "jamstec-react-earth-project",
   "license": "MIT",
   "private": true,
   "type": "module",
@@ -8,7 +8,7 @@
     "demo"
   ],
   "scripts": {
-    "dev": "concurrently -n LIB,DEMO -c blue,green \"npm run watch --workspace=lib\" \"npm run start --workspace=react-earth-demo\"",
+    "dev": "concurrently -n LIB,DEMO -c blue,green \"npm run watch --workspace=lib\" \"npm run start --workspace=jamstec-react-earth-demo\"",
     "typecheck": "tsc --noEmit -p demo/tsconfig.app.json && tsc --noEmit -p lib/tsconfig.json",
     "lint": "eslint . --fix",
     "lint:check": "eslint .",

@@ -1,8 +1,8 @@
-# react-earth
+# jamstec-react-earth
 
 This project is a React and TypeScript reimplementation of the brilliant [Cambecc/earth](https://github.com/cambecc/earth) project created by Cameron Beccario.
 
-![demo](https://raw.githubusercontent.com/JAMSTEC-SPDX/react-earth/main/docs/demo.gif)
+![demo](https://raw.githubusercontent.com/JAMSTEC-SPDX/jamstec-react-earth/main/docs/demo.gif)
 
 The data visualization logic remains largely the same and relies on SVG/D3, WebGL and canvas for rendering.
 
@@ -21,14 +21,14 @@ Technology (JAMSTEC), which studies climate and works on forecasting it.
 First, install the library in your React project:
 
 ```bash
-npm install react-earth
+npm install jamstec-react-earth
 ```
 
 Then use the Earth component in your application:
 
 ```tsx
-import Earth, { GlobeController } from "react-earth";
-import "react-earth/dist/index.css";
+import Earth, { GlobeController } from "jamstec-react-earth";
+import "jamstec-react-earth/dist/index.css";
 
 const globeController = new GlobeController();
 
@@ -148,8 +148,8 @@ However, real meteorological data can be obtained from the [Global Forecast Syst
 Run the library watcher and demo app:
 
 ```bash
-git clone https://github.com/JAMSTEC-SPDX/react-earth
-cd react-earth
+git clone https://github.com/JAMSTEC-SPDX/jamstec-react-earth
+cd jamstec-react-earth
 npm install
 npm run dev
 ```
