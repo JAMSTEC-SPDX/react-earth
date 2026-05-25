@@ -6,8 +6,9 @@ This project is a React and TypeScript reimplementation of the brilliant [Cambec
 
 The data visualization logic remains largely the same and relies on SVG/D3, WebGL and canvas for rendering.
 
-This project was sponsored by the Japan Agency for Marine-Earth Science and
-Technology (JAMSTEC), which studies climate and works on forecasting it.
+The development of this project was lead by the
+[Japan Agency for Marine-Earth Science and Technology (JAMSTEC)](https://www.jamstec.go.jp/e/),
+which studies climate and works on forecasting it.
 
 ## Architecture
 
