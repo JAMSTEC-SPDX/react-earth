@@ -1,6 +1,9 @@
 {
-  "name": "react-earth",
+  "name": "@jamstec-spdx/react-earth",
   "version": "0.0.1-dev",
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",

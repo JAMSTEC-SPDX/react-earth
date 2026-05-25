@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "paths": { "@/*": ["./src/*"], "react-earth": ["../lib/src"] },
+    "paths": { "@/*": ["./src/*"], "@jamstec-spdx/react-earth": ["../lib/src"] },
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "es2023",
     "lib": ["ES2023", "DOM"],

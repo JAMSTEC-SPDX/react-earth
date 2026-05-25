@@ -1,4 +1,4 @@
-import type { Vector } from "react-earth";
+import type { Vector } from "@jamstec-spdx/react-earth";
 
 import type { ExtendedMarker, FieldType } from "./types";
 import { magnitude } from "./utils/maths";

@@ -1,5 +1,5 @@
-import type { Marker, Vector } from "react-earth";
-import type { OverlayToolBox, Projection } from "react-earth";
+import type { Marker, Vector } from "@jamstec-spdx/react-earth";
+import type { OverlayToolBox, Projection } from "@jamstec-spdx/react-earth";
 
 export type Config = {
   projection: Projection;

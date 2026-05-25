@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import type { Vector } from "react-earth";
+import type { Vector } from "@jamstec-spdx/react-earth";
 
 import type {
   ExtendedOverlayToolBox,
