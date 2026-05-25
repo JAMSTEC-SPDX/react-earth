@@ -13,17 +13,23 @@ This repository is organized as a monorepo containing:
 
 If you want to customize the demo application for your own use cases, see [`demo/README.md`](https://github.com/JAMSTEC-SPDX/jamstec-react-earth/tree/main/demo) for more information.
 
-This project was sponsored by the Japan Agency for Marine-Earth Science and
-Technology (JAMSTEC), which studies climate and works on forecasting it.
+The development of this project was lead by the
+[Japan Agency for Marine-Earth Science and Technology (JAMSTEC)](https://www.jamstec.go.jp/e/),
+which studies climate and works on forecasting it.
 
-## Architecture of lib
 
-- React handles UI and application state.
-- d3-geo computes projections and map geometry.
-- WebGL renders the scalar data overlay.
-- Canvas is used for particle-based vector field animation.
+## Project installation & development
 
-## Installation & basic usage
+Run the library watcher and demo app:
+
+```bash
+git clone https://github.com/JAMSTEC-SPDX/jamstec-react-earth
+cd jamstec-react-earth
+npm install
+npm run dev
+```
+
+## Lib installation & basic usage
 
 First, install the library in your React project:
 
