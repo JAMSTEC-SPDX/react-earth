@@ -200,7 +200,7 @@ const Earth = ({
   useEffect(() => {
     if (!svgController) return;
 
-    const handleClick = (event: MouseEvent) => {
+    const handleClick = (event: PointerEvent) => {
       if (!globeSvgRef.current || !selectMarker || !removeMarker) return;
 
       const rect = globeSvgRef.current.getBoundingClientRect();
