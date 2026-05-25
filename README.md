@@ -64,6 +64,27 @@ demo application in the [demo directory](https://github.com/JAMSTEC-SPDX/react-e
 
 Please refer to [`lib/README.md`](https://github.com/JAMSTEC-SPDX/react-earth/tree/main/lib) for more information.
 
+## Release process
+
+The `@jamstec-spdx/react-earth` package is automatically published to npm through GitHub Actions when a new GitHub release is created.
+
+To publish a new version:
+
+1. create and push a version tag:
+
+```bash
+git tag v0.0.X
+git push origin v0.0.X
+```
+
+2. create a new GitHub release associated with this tag.
+
+The CI pipeline will then automatically:
+
+- build the library,
+- update the package version,
+- publish the package to npm.
+
 ## Current status
 
 The API is still evolving and may change before the first stable release.

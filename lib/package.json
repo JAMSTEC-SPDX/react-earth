@@ -1,10 +1,19 @@
 {
   "name": "@jamstec-spdx/react-earth",
   "version": "0.0.1-dev",
-  "publishConfig": {
-    "access": "public"
-  },
   "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JAMSTEC-SPDX/react-earth.git"
+  },
+  "homepage": "https://github.com/JAMSTEC-SPDX/react-earth",
+  "bugs": {
+    "url": "https://github.com/JAMSTEC-SPDX/react-earth/issues"
+  },
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
