@@ -112,7 +112,7 @@ export default function useDataToolBox(param: FieldType) {
   >(null);
 
   const fetchData = async (param: FieldType) => {
-    const filename = `data/${param}_data.json`;
+    const filename = `${import.meta.env.BASE_URL}data/${param}_data.json`;
     const res = await fetch(filename);
     if (!res.ok) throw new Error(`Failed to load file: ${filename}`);
     return res.json();
