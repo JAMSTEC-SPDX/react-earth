@@ -5,7 +5,7 @@ import {
   bilinearInterpolateVector,
   interpolateField,
   type Vector,
-} from "jamstec-react-earth";
+} from "react-earth";
 
 import type { ExtendedOverlayToolBox, FieldType, RawData } from "./types";
 import { isScalar } from "./utils/fieldTypes";
