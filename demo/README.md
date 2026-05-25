@@ -1,6 +1,6 @@
-# jamstec-react-earth-demo
+# react-earth-demo
 
-This demo showcases a practical example of how to use the **jamstec-react-earth** library,
+This demo showcases a practical example of how to use the **react-earth** library,
 a React-based solution for rendering interactive globe visualizations.
 
 ## Features
