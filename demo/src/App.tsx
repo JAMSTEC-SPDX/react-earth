@@ -8,9 +8,9 @@ import {
   type SetStateAction,
 } from "react";
 
+import Earth, { GlobeController } from "@jamstec-spdx/react-earth";
 import type { FeatureCollection, Geometry } from "geojson";
-import Earth, { GlobeController } from "react-earth";
-import "react-earth/dist/index.css";
+import "@jamstec-spdx/react-earth/dist/index.css";
 import { feature } from "topojson-client";
 import type { Topology } from "topojson-specification";
 
