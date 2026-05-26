@@ -121,9 +121,12 @@ const EarthView = ({
 };
 
 const App = () => {
-  const [coastlines, setCoastlines] = useState<FeatureCollection<Geometry>>();
   const [config, setConfig] = useState(DEFAULT_CONFIG);
 
+  // *********************
+  // * Coastlines        *
+  // *********************
+  const [coastlines, setCoastlines] = useState<FeatureCollection<Geometry>>();
   useEffect(() => {
     const fetchTopology = async () => {
       const topo: Topology = await fetch(
@@ -143,14 +146,28 @@ const App = () => {
     fetchTopology();
   }, []);
 
+  // ******************************
+  // * Globe alignement direction *
+  // ******************************
+  const [isPortrait, setIsPortrait] = useState(
+    () => window.matchMedia("(orientation: portrait)").matches,
+  );
+
+  const globeDirection = useMemo(() => {
+    if (config.projection === "equirectangular") return "column";
+    return isPortrait ? "column" : "row";
+  }, [config.projection, isPortrait]);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(orientation: portrait)");
+    const handler = (e: MediaQueryListEvent) => setIsPortrait(e.matches);
+    mq.addEventListener("change", handler);
+
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
   return (
-    <div
-      className="main-page"
-      style={{
-        flexDirection:
-          config.projection === "equirectangular" ? "column" : "row",
-      }}
-    >
+    <div className="main-page" style={{ flexDirection: globeDirection }}>
       <EarthView
         coastlines={coastlines}
         config={config}
