@@ -26,6 +26,11 @@ export default class GlobeController {
   private listeners: Set<GlobeListener> = new Set();
   private previousRedraw: number | null = null;
 
+  // stores state for pinch-to-zoom gesture handling on touch screens
+  private activePointers = new Map<number, PointerEvent>();
+  private pinchDistance: number | null = null;
+  private isPinching = false;
+
   setRotation(r: [number, number]) {
     this.rotation = r;
     this.emit();
@@ -58,13 +63,40 @@ export default class GlobeController {
     this.initialRotation = [...this.rotation];
     this.isDragging = false;
     this.draggingGlobe = globe;
+    this.activePointers.set(e.pointerId, e);
 
-    window.addEventListener("pointermove", this.handlePointerMove);
-    window.addEventListener("pointerup", this.handlePointerUp);
+    if (this.activePointers.size === 1) {
+      window.addEventListener("pointermove", this.handlePointerMove);
+      window.addEventListener("pointerup", this.handlePointerUp);
+    } else if (this.activePointers.size === 2) {
+      this.isPinching = true;
+    }
   };
 
   handlePointerMove = (e: PointerEvent) => {
     if (!this.startMouse) return;
+
+    this.activePointers.set(e.pointerId, e);
+
+    // Zoom if there are at least 2 pointers on the screen
+    if (this.activePointers.size >= 2) {
+      const [a, b] = [...this.activePointers.values()];
+
+      const dx = a.clientX - b.clientX;
+      const dy = a.clientY - b.clientY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (this.pinchDistance) {
+        const ratio = distance / this.pinchDistance;
+        const delta = (ratio - 1) * 0.6;
+        this.setScale(
+          Math.max(MIN_SCALE, Math.min(MAX_SCALE, this.scale * (1 + delta))),
+        );
+      }
+
+      this.pinchDistance = distance;
+      return;
+    }
 
     // The Y delta is inverted because screen coordinates increase downward,
     // while geographic latitude increases upward (north), so we flip the sign
@@ -86,15 +118,20 @@ export default class GlobeController {
 
   handlePointerUp = (e: PointerEvent) => {
     this.startMouse = null;
+    this.activePointers.delete(e.pointerId);
 
-    if (!this.isDragging) {
+    if (!this.isDragging && !this.isPinching) {
       this.draggingGlobe?.handleClick(e);
     }
 
     this.draggingGlobe = undefined;
 
-    window.removeEventListener("pointermove", this.handlePointerMove);
-    window.removeEventListener("pointerup", this.handlePointerUp);
+    if (this.activePointers.size === 0) {
+      this.pinchDistance = null;
+      this.isPinching = false;
+      window.removeEventListener("pointermove", this.handlePointerMove);
+      window.removeEventListener("pointerup", this.handlePointerUp);
+    }
   };
 
   // **************
