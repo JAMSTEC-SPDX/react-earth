@@ -1,16 +1,15 @@
-import type { Marker, Vector } from "@jamstec-spdx/react-earth";
-import type { OverlayToolBox, Projection } from "@jamstec-spdx/react-earth";
+import type {
+  Marker,
+  OverlayToolBox,
+  Projection,
+  Vector,
+} from "@jamstec-spdx/react-earth";
 
 export type Config = {
   projection: Projection;
   param1: FieldType;
   param2: FieldType;
   compareMode: boolean;
-};
-
-export type ColorScaleBounds = {
-  lowerBound: number;
-  upperBound: number;
 };
 
 export type ColorScaleBoundsInput = {

@@ -1,11 +1,10 @@
 import { useEffect } from "react";
 
-import type { Vector } from "@jamstec-spdx/react-earth";
+import type { ColorScaleBounds, Vector } from "@jamstec-spdx/react-earth";
 
 import type {
   ExtendedOverlayToolBox,
   ExtendedMarker,
-  ColorScaleBounds,
   ColorScaleBoundsInput,
 } from "@/types";
 

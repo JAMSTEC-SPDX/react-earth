@@ -10,7 +10,9 @@ import {
   type SetStateAction,
 } from "react";
 
-import type { ColorScaleBounds, ColorScaleBoundsInput, Config } from "./types";
+import type { ColorScaleBounds } from "@jamstec-spdx/react-earth";
+
+import type { ColorScaleBoundsInput, Config } from "./types";
 import { getColorScale } from "./utils/fieldTypes";
 import { linearInterpolate, roundToDecimal } from "./utils/maths";
 import { colorScaleBoundToInputs, useDebounceFunc } from "./utils/utils";

@@ -9,7 +9,14 @@ export {
 
 export { default as GlobeController } from "./GlobeController";
 
-export type { Marker, Vector, Projection, View, OverlayToolBox } from "./types";
+export type {
+  ColorScaleBounds,
+  Marker,
+  OverlayToolBox,
+  Projection,
+  Vector,
+  View,
+} from "./types";
 
 // useful helpers for formatting raw data into the format expected by this library
 export {
