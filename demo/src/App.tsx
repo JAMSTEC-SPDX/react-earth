@@ -8,7 +8,7 @@ import {
   type SetStateAction,
 } from "react";
 
-import Earth, { GlobeController } from "@jamstec-spdx/react-earth";
+import Earth, { GlobeController, type ColorScaleBounds } from "@jamstec-spdx/react-earth";
 import type { FeatureCollection, Geometry } from "geojson";
 import "@jamstec-spdx/react-earth/dist/index.css";
 import { feature } from "topojson-client";
@@ -17,7 +17,7 @@ import type { Topology } from "topojson-specification";
 import { DEFAULT_CONFIG } from "./consts";
 import EarthMenu from "./EarthMenu";
 import MarkerPanel from "./MarkerPanel";
-import type { ColorScaleBounds, Config, ExtendedMarker } from "./types";
+import type { Config, ExtendedMarker } from "./types";
 import useDataToolBox from "./useDataToolBox";
 import { getColorScale, getColorScaleBounds } from "./utils/fieldTypes";
 import { getMarkerData } from "./utils/utils";

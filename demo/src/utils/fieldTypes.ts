@@ -1,10 +1,11 @@
 import {
   getSegmentedColorScaleFunction,
+  type ColorScaleBounds,
   type ColorSegment,
   type RGBAColor,
 } from "@jamstec-spdx/react-earth";
 
-import type { FieldType, ColorScaleBounds } from "../types";
+import type { FieldType } from "../types";
 import { linearInterpolate } from "./maths";
 
 export function isScalar(fieldType: FieldType) {
