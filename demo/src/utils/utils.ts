@@ -28,8 +28,7 @@ export function getMarkerData(
   λ: number,
   φ: number,
   overlayToolBox:
-    | ExtendedOverlayToolBox<Vector>
-    | ExtendedOverlayToolBox<number>,
+    ExtendedOverlayToolBox<Vector> | ExtendedOverlayToolBox<number>,
 ): ExtendedMarker {
   const { dataType, getScalarForOverlay, interpolate } = overlayToolBox;
   return {
