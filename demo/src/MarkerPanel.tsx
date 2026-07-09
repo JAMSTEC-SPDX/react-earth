@@ -1,44 +1,8 @@
 import type { Vector } from "@jamstec-spdx/react-earth";
 
-import type { ExtendedMarker, FieldType } from "./types";
+import type { ExtendedMarker, Unit } from "./types";
+import { getUnit } from "./utils/fieldTypes";
 import { magnitude } from "./utils/maths";
-
-type Unit = {
-  label: string;
-  conversion: (x: number) => number;
-  precision: number;
-};
-
-function getUnit(fieldType: FieldType): Unit {
-  switch (fieldType) {
-    case "wind":
-      return {
-        label: "m/s",
-        conversion: function (x: number) {
-          return x;
-        },
-        precision: 2,
-      };
-    case "temperature":
-      return {
-        label: "°C",
-        conversion: function (x: number) {
-          return x;
-        },
-        precision: 1,
-      };
-    case "current":
-      return {
-        label: "cm/s",
-        conversion: function (x: number) {
-          return x;
-        },
-        precision: 2,
-      };
-    default:
-      throw new Error(`Field type ${fieldType} not handled`);
-  }
-}
 
 /** Returns a human readable string for the provided coordinates. */
 function formatCoordinates(λ: number, φ: number) {

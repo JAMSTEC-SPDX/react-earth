@@ -196,6 +196,12 @@ body {
   gap: 5px;
 }
 
+.color-scale-input-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
 .color-scale-input {
   background-color: transparent;
   color: #ffffff;
@@ -212,4 +218,12 @@ body {
     sans-serif;
   -webkit-font-smoothing: subpixel-antialiased;
   width: 60px;
+}
+
+.color-scale-input-unit {
+  position: static;
+  margin-left: 6px;
+  font-size: 14px;
+  color: #888;
+  white-space: nowrap;
 }

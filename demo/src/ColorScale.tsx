@@ -12,7 +12,7 @@ import {
 import type { ColorScaleBounds } from "@jamstec-spdx/react-earth";
 
 import type { ColorScaleBoundsInput, FieldType } from "./types";
-import { getColorScale } from "./utils/fieldTypes";
+import { getColorScale, getUnit } from "./utils/fieldTypes";
 import { roundToDecimal, linearInterpolate } from "./utils/maths";
 import { colorScaleBoundToInputs, useDebounceFunc } from "./utils/utils";
 
@@ -99,22 +99,32 @@ const ColorScale = ({
       <div className="setting-label">scale</div>
       <div className="setting-separator" />
       <div className="color-scale-container">
-        <input
-          className="color-scale-input"
-          type="text"
-          value={tmpColorScaleBounds.lowerBound}
-          onChange={(e) => handleColorScaleBoundChange(e, "lowerBound")}
-        />
+        <div className="color-scale-input-container">
+          <input
+            className="color-scale-input"
+            type="text"
+            value={tmpColorScaleBounds.lowerBound}
+            onChange={(e) => handleColorScaleBoundChange(e, "lowerBound")}
+          />
+          <span className="color-scale-input-unit">
+            {getUnit(fieldType).label}
+          </span>
+        </div>
         <canvas
           ref={colorScaleRef}
           style={{ height: "22.5px", width: `${colorScaleWidth}px` }}
         />
-        <input
-          type="text"
-          className="color-scale-input"
-          value={tmpColorScaleBounds.upperBound}
-          onChange={(e) => handleColorScaleBoundChange(e, "upperBound")}
-        />
+        <div className="color-scale-input-container">
+          <input
+            type="text"
+            className="color-scale-input"
+            value={tmpColorScaleBounds.upperBound}
+            onChange={(e) => handleColorScaleBoundChange(e, "upperBound")}
+          />
+          <span className="color-scale-input-unit">
+            {getUnit(fieldType).label}
+          </span>
+        </div>
       </div>
     </div>
   );
