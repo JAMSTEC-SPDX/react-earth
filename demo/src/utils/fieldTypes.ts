@@ -5,7 +5,7 @@ import {
   type RGBAColor,
 } from "@jamstec-spdx/react-earth";
 
-import type { FieldType } from "../types";
+import type { FieldType, Unit } from "../types";
 import { linearInterpolate } from "./maths";
 
 export function isScalar(fieldType: FieldType) {
@@ -59,6 +59,37 @@ export function getColorScale(
   }
 
   return getSegmentedColorScaleFunction(colorSegments);
+}
+
+export function getUnit(fieldType: FieldType): Unit {
+  switch (fieldType) {
+    case "wind":
+      return {
+        label: "m/s",
+        conversion: function (x: number) {
+          return x;
+        },
+        precision: 2,
+      };
+    case "temperature":
+      return {
+        label: "°C",
+        conversion: function (x: number) {
+          return x;
+        },
+        precision: 1,
+      };
+    case "current":
+      return {
+        label: "cm/s",
+        conversion: function (x: number) {
+          return x;
+        },
+        precision: 2,
+      };
+    default:
+      throw new Error(`Field type ${fieldType} not handled`);
+  }
 }
 
 // **************

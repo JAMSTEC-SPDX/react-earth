@@ -12,6 +12,12 @@ export type Config = {
   compareMode: boolean;
 };
 
+export type Unit = {
+  label: string;
+  conversion: (x: number) => number;
+  precision: number;
+};
+
 export type ColorScaleBoundsInput = {
   lowerBound: string;
   upperBound: string;
