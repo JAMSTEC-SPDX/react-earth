@@ -173,7 +173,7 @@ const Earth = ({
       rotationRef.current,
       scaleRef.current,
     );
-  }, [getColor]);
+  }, [getColor, overlayToolBox]);
 
   // *********************************************
   // * On projection change or window resize     *
