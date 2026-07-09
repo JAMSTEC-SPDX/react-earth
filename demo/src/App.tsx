@@ -8,7 +8,10 @@ import {
   type SetStateAction,
 } from "react";
 
-import Earth, { GlobeController, type ColorScaleBounds } from "@jamstec-spdx/react-earth";
+import Earth, {
+  GlobeController,
+  type ColorScaleBounds,
+} from "@jamstec-spdx/react-earth";
 import type { FeatureCollection, Geometry } from "geojson";
 import "@jamstec-spdx/react-earth/dist/index.css";
 import { feature } from "topojson-client";
