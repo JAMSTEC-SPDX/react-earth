@@ -12,14 +12,7 @@ import { isScalar } from "./utils/fieldTypes";
 import { isValue, magnitude } from "./utils/maths";
 
 function interpolateVectorField(json: RawData) {
-  const grid = {
-    nx: json[0].header.nx,
-    ny: json[0].header.ny,
-    lon0: json[0].header.lo1,
-    lat0: json[0].header.la1,
-    dx: json[0].header.dx,
-    dy: json[0].header.dy,
-  };
+  const grid = json[0].header;
 
   if (json.length < 2) throw new Error("Vector data should have 2 components");
 
@@ -44,14 +37,7 @@ function parseRawData(
   json: RawData,
   fieldType: FieldType,
 ): ExtendedOverlayToolBox<number> | ExtendedOverlayToolBox<Vector> {
-  const grid = {
-    nx: json[0].header.nx,
-    ny: json[0].header.ny,
-    lon0: json[0].header.lo1,
-    lat0: json[0].header.la1,
-    dx: json[0].header.dx,
-    dy: json[0].header.dy,
-  };
+  const grid = json[0].header;
 
   if (isScalar(fieldType)) {
     const interpolate = interpolateField(grid, {

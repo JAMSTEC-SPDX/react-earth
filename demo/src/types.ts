@@ -54,8 +54,8 @@ export type RawData = {
     nx: number;
     ny: number;
     /** Longitude and latitude of the first grid point (degrees) */
-    lo1: number;
-    la1: number;
+    lon0: number;
+    lat0: number;
     /** Grid spacing in the longitudinal and latitudinal direction (degrees) */
     dx: number;
     dy: number;
