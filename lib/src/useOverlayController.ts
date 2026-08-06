@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 
-import type { Projection } from "./types";
+import type { GridParams, Projection } from "./types";
 import { compileShader, createUVsForSphere, orthographic } from "./utils/webGl";
 
 type OverlayController = {
@@ -10,6 +10,7 @@ type OverlayController = {
     nx: number,
     ny: number,
   ) => void;
+  setupGrid(grid: GridParams): void;
   drawOverlay: (
     prjection: Projection,
     rotation: [number, number],
@@ -53,6 +54,7 @@ const useOverlayController = (
 ) => {
   const overlayDeactivated = useRef(true);
   const overlayControllerRef = useRef<OverlayController | null>(null);
+  let currentGrid: GridParams | null = null;
 
   useLayoutEffect(() => {
     const canvas = overlayCanvasRef.current;
@@ -111,6 +113,10 @@ const useOverlayController = (
       overlayDeactivated.current = false;
     };
 
+    const setupGrid = (grid: GridParams) => {
+      currentGrid = grid;
+    };
+
     // -------------------------
     // 2️⃣ PROGRAMS AND SHADERS
     // -------------------------
@@ -134,10 +140,9 @@ const useOverlayController = (
     uniform vec2 uRotation;
     uniform mat4 uProjection;
 
-    out vec2 vUV;
+    out vec2 vLonLat;
 
     const float PI = 3.141592653589793;
-    const float EPS = 1e-5;
 
     vec3 sph(float lon, float lat) {
       float x = cos(lat) * sin(lon);
@@ -163,13 +168,14 @@ const useOverlayController = (
     }
 
     void main() {
-      vUV = aUV;
 
       // - Convert lon/lat from [0,1] to [-π,π] and [-π/2,π/2]
       // - Flip y to compensate for the opposite latitude orientation
       //   between the dataset and the sphere UV mapping
       float lon = aUV.x * 2.0 * PI - PI;
       float lat = (1.0 - aUV.y) * PI - PI * 0.5;
+
+      vLonLat = vec2(lon, lat);
 
       vec3 p = sph(lon, lat);
 
@@ -185,18 +191,41 @@ const useOverlayController = (
     const orthoFragmentShaderSource = `#version 300 es
     precision highp float;
 
-    in vec2 vUV;
+    in vec2 vLonLat;
 
     uniform sampler2D uTexture;
 
+    uniform vec4 uGrid;      // lon0, lat0, dx, dy (degrees)
+    uniform vec2 uGridSize;  // nx, ny (degrees)
+    uniform bool uWrapLongitude;
+
     out vec4 outColor;
 
+    const float PI = 3.141592653589793;
+
     void main() {
-      // Shift the texture horizontally by π to match the sphere webGL orientation
-      vec2 uv = vec2(fract(vUV.x + 0.5), vUV.y);
-      outColor = texture(uTexture, uv);
+
+      float lon = degrees(vLonLat.x);
+      float lat = degrees(vLonLat.y);
+
+      float u = (lon - uGrid.x) / (uGrid.z * (uGridSize.x - 1.0));
+      float v = (uGrid.y - lat) / (uGrid.w * (uGridSize.y - 1.0));
+
+      if (uWrapLongitude) {
+        u = fract(u);
+      } else {
+        if (u < 0.0 || u > 1.0) {
+          discard;
+        }
+      }
+
+      if (v < 0.0 || v > 1.0) {
+        discard;
+      }
+
+      outColor = texture(uTexture, vec2(u, v));
     }
-  `;
+    `;
 
     const { program: orthoProgram, cleanup: cleanUpOrthoProgram } =
       createProgram(gl, orthoVertexShaderSource, orthoFragmentShaderSource);
@@ -205,6 +234,10 @@ const useOverlayController = (
       uRotation: gl.getUniformLocation(orthoProgram, "uRotation"),
       aUV: gl.getAttribLocation(orthoProgram, "aUV"),
       uProjection: gl.getUniformLocation(orthoProgram, "uProjection"),
+
+      uGrid: gl.getUniformLocation(orthoProgram, "uGrid"),
+      uGridSize: gl.getUniformLocation(orthoProgram, "uGridSize"),
+      uWrapLongitude: gl.getUniformLocation(orthoProgram, "uWrapLongitude"),
     };
 
     // ---------- EQUIRECT PROGRAM ----------
@@ -242,15 +275,19 @@ const useOverlayController = (
     uniform vec2 uViewport;
     uniform float uScale;
 
+    uniform vec4 uGrid;      // lon0, lat0, dx, dy (degrees)
+    uniform vec2 uGridSize;  // nx, ny (degrees)
+    uniform bool uWrapLongitude;
+
     out vec4 outColor;
 
     const float PI = 3.141592653589793;
 
     vec3 sph(float lon, float lat) {
-    float x = cos(lat) * sin(lon);
-    float y = sin(lat);
-    float z = cos(lat) * cos(lon);
-    return vec3(x, y, z);
+      float x = cos(lat) * sin(lon);
+      float y = sin(lat);
+      float z = cos(lat) * cos(lon);
+      return vec3(x, y, z);
     }
 
     mat3 rotX(float a) {
@@ -264,7 +301,7 @@ const useOverlayController = (
     mat3 rotY(float a) {
       return mat3(
         cos(a), 0.0, -sin(a),
-           0.0, 1.0,     0.0,
+          0.0, 1.0,     0.0,
         sin(a), 0.0,  cos(a)
       );
     }
@@ -291,14 +328,23 @@ const useOverlayController = (
       float rotatedLon = atan(rotatedP.x, rotatedP.z);
       float rotatedLat = asin(clamp(rotatedP.y, -1.0, 1.0));
 
-      // uv should be in [0, 1] -> normalize
-      vec2 uv = vec2(
-        fract((rotatedLon + PI) / (2.0 * PI) + 0.5), // Fract to avoid meridian cut and add 0.5 to shift the
-                                                     // texture horizontally by π to match the sphere webGL orientation
-        1.0 - ((rotatedLat + PI * 0.5) / PI)         // Flip lat to match texture
-      );
+      float lonDeg = degrees(rotatedLon);
+      float latDeg = degrees(rotatedLat);
 
-      outColor = texture(uTexture, uv);
+      float u = (lonDeg - uGrid.x) / (uGrid.z * (uGridSize.x - 1.0));
+      float v = (uGrid.y - latDeg) / (uGrid.w * (uGridSize.y - 1.0));
+
+      if (uWrapLongitude) {
+        u = fract(u);
+      } else if (u < 0.0 || u > 1.0) {
+        discard;
+      }
+
+      if (v < 0.0 || v > 1.0) {
+        discard;
+      }
+
+      outColor = texture(uTexture, vec2(u, v));
     }
   `;
 
@@ -314,6 +360,10 @@ const useOverlayController = (
       aScreenPos: gl.getAttribLocation(equirectProgram, "aScreenPos"),
       uViewport: gl.getUniformLocation(equirectProgram, "uViewport"),
       uScale: gl.getUniformLocation(equirectProgram, "uScale"),
+
+      uGrid: gl.getUniformLocation(equirectProgram, "uGrid"),
+      uGridSize: gl.getUniformLocation(equirectProgram, "uGridSize"),
+      uWrapLongitude: gl.getUniformLocation(equirectProgram, "uWrapLongitude"),
     };
 
     // -------------------------
@@ -363,6 +413,7 @@ const useOverlayController = (
       if (overlayDeactivated.current) return;
       if (!gl) throw new Error("No gl context !");
       if (!canvas) throw new Error("No canvas !");
+      if (!currentGrid) throw new Error("No grid !");
 
       const isOrtho = projection === "ortho";
 
@@ -379,6 +430,14 @@ const useOverlayController = (
       gl.bindTexture(gl.TEXTURE_2D, texture);
 
       gl.uniform2f(locations.uRotation, rotation[0], rotation[1]);
+
+      const grid = currentGrid;
+      gl.uniform4f(locations.uGrid, grid.lon0, grid.lat0, grid.dx, grid.dy);
+      gl.uniform2f(locations.uGridSize, grid.nx, grid.ny);
+
+      const lonSpan = (grid.nx - 1) * grid.dx;
+      const wrapLongitude = lonSpan >= 360 - grid.dx;
+      gl.uniform1i(locations.uWrapLongitude, wrapLongitude ? 1 : 0);
 
       clearOverlay();
 
@@ -429,6 +488,7 @@ const useOverlayController = (
     overlayControllerRef.current = {
       deactivateOverlay,
       setupTexture,
+      setupGrid,
       drawOverlay,
       cleanUp,
     };

@@ -35,18 +35,20 @@ export type ViewBounds = {
 // * Data types     *
 // ******************
 
+export type GridParams = {
+  /** Number of grid points along the longitude and latitude axis */
+  nx: number;
+  ny: number;
+  /** Longitude and latitude of the first grid point (degrees) */
+  lon0: number;
+  lat0: number;
+  /** Grid spacing in the longitudinal and latitudinal direction (degrees) */
+  dx: number;
+  dy: number;
+};
+
 export type OverlayToolBox<T> = {
-  grid: {
-    /** Number of grid points along the longitude and latitude axis */
-    nx: number;
-    ny: number;
-    /** Longitude and latitude of the first grid point (degrees) */
-    lon0: number;
-    lat0: number;
-    /** Grid spacing in the longitudinal and latitudinal direction (degrees) */
-    dx: number;
-    dy: number;
-  };
+  grid: GridParams;
   overlayData: (number | null)[];
   interpolate: (λ: number, φ: number) => T | null;
 };

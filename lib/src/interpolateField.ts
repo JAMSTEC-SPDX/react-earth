@@ -50,6 +50,9 @@ export default function interpolateField<T>(
   const { dx: Δλ, dy: Δφ } = gridSettings; // distance between grid points (e.g., 2.5 deg lon, 2.5 deg lat)
   const { nx: ni, ny: nj } = gridSettings; // number of grid points W-E and N-S (e.g., 144 x 73)
 
+  const latMin = Math.min(φ0, φ0 - (nj - 1) * Δφ);
+  const latMax = Math.max(φ0, φ0 - (nj - 1) * Δφ);
+
   // 1. transform the raw data in grid lon/lat
   // Scan mode 0 assumed. Longitude increases from λ0, and latitude decreases from φ0.
   // http://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_table3-4.shtml
@@ -69,6 +72,8 @@ export default function interpolateField<T>(
 
   // 2. create interpolation function
   function interpolate(λ: number, φ: number) {
+    if (φ < latMin || φ > latMax) return null;
+
     const i = floorMod(λ - λ0, 360) / Δλ; // calculate longitude index in wrapped range [0, 360)
     const j = (φ0 - φ) / Δφ; // calculate latitude index in direction +90 to -90
 

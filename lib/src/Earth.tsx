@@ -168,6 +168,7 @@ const Earth = ({
     }
 
     overlayController.setupTexture(colorData, nx, ny);
+    overlayController.setupGrid(overlayToolBox.grid);
     overlayController.drawOverlay(
       projection,
       rotationRef.current,
