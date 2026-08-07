@@ -2,9 +2,9 @@ import { useRef, useLayoutEffect, useState } from "react";
 
 import * as d3 from "d3";
 import { geoPath, type GeoPermissibleObjects, type GeoSphere } from "d3-geo";
-import type { FeatureCollection, Geometry, LineString, Point } from "geojson";
+import type { LineString, Point } from "geojson";
 
-import type { View, Projection, Marker } from "./types";
+import type { View, Projection, Marker, CoastlinesByLOD } from "./types";
 import { createProjection } from "./utils/projections";
 
 const SPHERE: GeoSphere = { type: "Sphere" };
@@ -17,7 +17,8 @@ type SvgController = {
     rotation: [number, number],
   ) => void;
   updateProjection: (scale: number, rotation: [number, number]) => void;
-  updateCoastlines: (coastlines: FeatureCollection<Geometry>) => void;
+  updateCoastlinesData: (coastlines: CoastlinesByLOD) => void;
+  updateCoastlinesLOD: (lod: "low" | "high") => void;
   drawMarker: (marker: Marker) => void;
   moveMarker: () => void;
   removeMarker: () => void;
@@ -29,6 +30,7 @@ const useSvgController = (
 ) => {
   const projectionRef = useRef<d3.GeoProjection | null>(null);
   const markerRef = useRef<Marker | null>(null);
+  const coastlinesByLOD = useRef<CoastlinesByLOD | null>(null);
   const [svgController, setSvgController] = useState<SvgController | null>(
     null,
   );
@@ -53,6 +55,7 @@ const useSvgController = (
       .attr("fill", "none")
       .attr("stroke", "white")
       .attr("stroke-width", 1);
+    const coastlinePath = globeSvg.select(".coastlines");
 
     // Graticules (long/lat grid) and equator line
     const graticule = d3.geoGraticule();
@@ -137,17 +140,17 @@ const useSvgController = (
       moveMarker();
     };
 
-    const updateCoastlines = (coastlines: FeatureCollection<Geometry>) => {
-      const svg = globeSvgRef.current;
-      if (!svg) return;
+    const updateCoastlinesData = (coastlines: CoastlinesByLOD) => {
+      coastlinesByLOD.current = coastlines;
+      updateCoastlinesLOD("high");
+    };
 
-      const globeSvg = d3.select(svg);
-      globeSvg
-        .select(".coastlines")
-        .datum(coastlines)
+    // LOD stands for level of details
+    const updateCoastlinesLOD = (lod: "low" | "high") => {
+      if (!coastlinesByLOD.current) return;
+      coastlinePath
+        .datum(coastlinesByLOD.current[lod])
         .attr("d", d3.geoPath().projection(projectionRef.current!));
-
-      updateSvg();
     };
 
     const changeProjection = (
@@ -173,7 +176,8 @@ const useSvgController = (
     setSvgController({
       changeProjection,
       updateProjection,
-      updateCoastlines,
+      updateCoastlinesData,
+      updateCoastlinesLOD,
       drawMarker,
       moveMarker,
       removeMarker,

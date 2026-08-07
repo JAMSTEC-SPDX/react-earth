@@ -1,3 +1,5 @@
+import type { FeatureCollection, Geometry } from "geojson";
+
 // ***************************
 // * Configuration types     *
 // ***************************
@@ -14,6 +16,11 @@ export type Marker = {
 export type ColorScaleBounds = {
   lowerBound: number;
   upperBound: number;
+};
+
+export type CoastlinesByLOD = {
+  low: FeatureCollection<Geometry>;
+  high: FeatureCollection<Geometry>;
 };
 
 // ******************
