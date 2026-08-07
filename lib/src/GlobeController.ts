@@ -12,12 +12,10 @@ const MAX_SCALE = BASE_SCALE * 10;
 const ZOOM_INTENSITY = 0.001;
 
 type GlobeListener = {
-  /** used during drag and zoom to update svg+overlay, but not the vector animator */
-  updateLayout: () => void;
-  /** reset the vector animator once the movement is over */
-  resetVectorAnimator: () => void;
   /** used to handle marker if needed */
   handleClick: (e: PointerEvent) => void;
+  interactionMove: () => void;
+  interactionEnd: () => void;
 };
 
 export default class GlobeController {
@@ -177,12 +175,12 @@ export default class GlobeController {
   }
 
   emit() {
-    this.listeners.forEach((listener) => listener.updateLayout());
+    this.listeners.forEach((listener) => listener.interactionMove());
 
     // redraw the overlay only 120ms after the end of the zoom, to improve performance
     if (this.previousRedraw) clearTimeout(this.previousRedraw);
     this.previousRedraw = window.setTimeout(() => {
-      this.listeners.forEach((listener) => listener.resetVectorAnimator());
+      this.listeners.forEach((listener) => listener.interactionEnd());
     }, 120);
   }
 }

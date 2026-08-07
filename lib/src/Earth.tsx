@@ -238,9 +238,9 @@ const Earth = ({
     };
 
     const unsubscribeGlobeController = globeController.subscribe(globeSvgRef, {
-      resetVectorAnimator,
-      updateLayout,
       handleClick,
+      interactionMove: updateLayout,
+      interactionEnd: resetVectorAnimator,
     });
 
     return () => unsubscribeGlobeController();
