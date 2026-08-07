@@ -14,6 +14,7 @@ const ZOOM_INTENSITY = 0.001;
 type GlobeListener = {
   /** used to handle marker if needed */
   handleClick: (e: PointerEvent) => void;
+  interactionStart: () => void;
   interactionMove: () => void;
   interactionEnd: () => void;
 };
@@ -23,6 +24,8 @@ export default class GlobeController {
   public scale: number = BASE_SCALE;
   private listeners: Set<GlobeListener> = new Set();
   private previousRedraw: number | null = null;
+
+  private isInteracting = false;
 
   // stores state for pinch-to-zoom gesture handling on touch screens
   private activePointers = new Map<number, PointerEvent>();
@@ -175,11 +178,17 @@ export default class GlobeController {
   }
 
   emit() {
+    if (!this.isInteracting) {
+      this.isInteracting = true;
+      this.listeners.forEach((l) => l.interactionStart());
+    }
+
     this.listeners.forEach((listener) => listener.interactionMove());
 
     // redraw the overlay only 120ms after the end of the zoom, to improve performance
     if (this.previousRedraw) clearTimeout(this.previousRedraw);
     this.previousRedraw = window.setTimeout(() => {
+      this.isInteracting = false;
       this.listeners.forEach((listener) => listener.interactionEnd());
     }, 120);
   }

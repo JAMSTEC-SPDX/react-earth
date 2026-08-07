@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useRef, type PropsWithChildren } from "react";
 
-import type { FeatureCollection, Geometry } from "geojson";
-
 import { TRANSPARENT_BLACK } from "./consts";
 import GlobeController from "./GlobeController";
-import type { Marker, OverlayToolBox, Projection, Vector, View } from "./types";
+import type {
+  CoastlinesByLOD,
+  Marker,
+  OverlayToolBox,
+  Projection,
+  Vector,
+  View,
+} from "./types";
 import useOverlayController from "./useOverlayController";
 import useSvgController from "./useSvgController";
 import applyProjectionToVectorField from "./utils/applyProjectionToVectorField";
@@ -15,7 +20,7 @@ import "./styles.css";
 import { VectorAnimator } from "./VectorAnimator";
 
 type EarthProps = PropsWithChildren<{
-  coastlines?: FeatureCollection<Geometry>;
+  coastlines?: CoastlinesByLOD;
   globeController: GlobeController;
   projection: Projection;
   overlayToolBox: OverlayToolBox<Vector> | OverlayToolBox<number> | null;
@@ -76,7 +81,7 @@ const Earth = ({
         scaleRef.current,
         rotationRef.current,
       );
-      svgController.updateCoastlines(coastlines);
+      svgController.updateCoastlinesData(coastlines);
     }
   }, [svgController, coastlines]);
 
@@ -239,8 +244,14 @@ const Earth = ({
 
     const unsubscribeGlobeController = globeController.subscribe(globeSvgRef, {
       handleClick,
+      interactionStart: () => {
+        svgController.updateCoastlinesLOD("low");
+      },
       interactionMove: updateLayout,
-      interactionEnd: resetVectorAnimator,
+      interactionEnd: () => {
+        resetVectorAnimator();
+        svgController.updateCoastlinesLOD("high");
+      },
     });
 
     return () => unsubscribeGlobeController();

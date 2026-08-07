@@ -10,6 +10,7 @@ import {
 
 import Earth, {
   GlobeController,
+  type CoastlinesByLOD,
   type ColorScaleBounds,
 } from "@jamstec-spdx/react-earth";
 import type { FeatureCollection, Geometry } from "geojson";
@@ -35,7 +36,7 @@ const ErrorMessageNotice = () => (
 );
 
 type EarthViewProps = {
-  coastlines?: FeatureCollection<Geometry>;
+  coastlines?: CoastlinesByLOD;
   isSecondary?: boolean;
   config: Config;
   setConfig: Dispatch<SetStateAction<Config>>;
@@ -129,21 +130,34 @@ const App = () => {
   // *********************
   // * Coastlines        *
   // *********************
-  const [coastlines, setCoastlines] = useState<FeatureCollection<Geometry>>();
+  const [coastlines, setCoastlines] = useState<CoastlinesByLOD>();
   useEffect(() => {
-    const fetchTopology = async () => {
+    async function loadCoastlines(
+      file: string,
+    ): Promise<FeatureCollection<Geometry>> {
       const topo: Topology = await fetch(
-        `${import.meta.env.BASE_URL}/earth-topo.json`,
+        `${import.meta.env.BASE_URL}/${file}`,
       ).then((r) => r.json());
+
       const coastlines = feature(topo, topo.objects.coastlines);
-      setCoastlines(
-        "features" in coastlines
-          ? coastlines
-          : {
-              type: "FeatureCollection",
-              features: [coastlines],
-            },
-      );
+      return "features" in coastlines
+        ? coastlines
+        : {
+            type: "FeatureCollection",
+            features: [coastlines],
+          };
+    }
+
+    const fetchTopology = async () => {
+      const [low, high] = await Promise.all([
+        loadCoastlines("earth-topo-110m.json"),
+        loadCoastlines("earth-topo-50m.json"),
+      ]);
+
+      setCoastlines({
+        low,
+        high,
+      });
     };
 
     fetchTopology();
