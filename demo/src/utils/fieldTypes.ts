@@ -39,7 +39,7 @@ export function getColorScaleBounds(fieldType: FieldType) {
 export function getColorScale(
   fieldType: FieldType,
   colorScaleBounds: ColorScaleBounds,
-): (value: number, alpha?: number) => RGBAColor {
+): (value: number) => RGBAColor {
   let colorSegments: ColorSegment[];
   switch (fieldType) {
     case "wind": {

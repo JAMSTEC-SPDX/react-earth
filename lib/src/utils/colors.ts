@@ -1,4 +1,4 @@
-import { TRANSPARENT_BLACK } from "../consts";
+import { ALPHA } from "../consts";
 import { proportion } from "./maths";
 
 export type RGBColor = [number, number, number];
@@ -32,7 +32,7 @@ function colorInterpolator(start: RGBColor, end: RGBColor) {
  *       { bound: 3.5, color: [0, 0, 255] }, ]
  */
 export const getSegmentedColorScaleFunction = (segments: ColorSegment[]) => {
-  return function (value: number, alpha = 1): RGBAColor {
+  return function (value: number, alpha = ALPHA): RGBAColor {
     const i = segments.findIndex((segment) => value < segment.bound);
 
     if (i === 0) return [...segments.at(0)!.color, alpha];
@@ -58,9 +58,9 @@ export function setPixelColor(
   i: number,
   color: RGBAColor,
 ) {
-  const [r, g, b] = color;
+  const [r, g, b, a] = color;
   colorData[i * 4] = r / 255;
   colorData[i * 4 + 1] = g / 255;
   colorData[i * 4 + 2] = b / 255;
-  colorData[i * 4 + 3] = color === TRANSPARENT_BLACK ? 0 : 0.4;
+  colorData[i * 4 + 3] = a;
 }

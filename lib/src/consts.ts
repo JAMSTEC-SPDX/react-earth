@@ -2,6 +2,7 @@ import type { VectorValue } from "./types";
 import type { RGBAColor } from "./utils/colors";
 
 export const TRANSPARENT_BLACK: RGBAColor = [0, 0, 0, 0];
+export const ALPHA = 0.6;
 
 // VECTOR PARTICLES CONFIGURATION
 export const NULL_VECTOR: VectorValue = [NaN, NaN, null]; // singleton for undefined location outside the vector field [u, v, mag]
