@@ -1,21 +1,21 @@
 # react-earth
 
-This project is a React and TypeScript reimplementation of the brilliant [Cambecc/earth](https://github.com/cambecc/earth) project created by Cameron Beccario.
+`react-earth` is a React and TypeScript library for building interactive 3D visualizations of Earth and geospatial data.
 
 ![demo](./docs/demo.gif)
 
-The data visualization logic remains largely the same and relies on SVG/D3, WebGL and canvas for rendering.
+It provides a reusable React component for displaying dynamic Earth-science datasets such as atmospheric and oceanographic fields, vector flows, markers, and other geospatial information on an interactive globe.
+
+React Earth is inspired by and largely based on the excellent [earth project](https://github.com/cambecc/earth) by Cameron Beccario, adapted to provide a reusable React/TypeScript component and make Earth-data visualizations easier to integrate into web applications.
 
 This repository is organized as a monorepo containing:
 
-- `lib`: the reusable `@jamstec-spdx/react-earth` library intended for publication on npm
-- `demo`: a demonstration application showcasing how to use the library
+- `lib`: the reusable [`@jamstec-spdx/react-earth`](https://www.npmjs.com/package/@jamstec-spdx/react-earth) library, published as an npm package
+- `demo`: a [demonstration application](https://jamstec-spdx.github.io/react-earth/) showcasing how to use the library
 
 If you want to customize the demo application for your own use cases, see [`demo/README.md`](https://github.com/JAMSTEC-SPDX/react-earth/tree/main/demo) for more information.
 
-The development of this project was lead by the
-[Japan Agency for Marine-Earth Science and Technology (JAMSTEC)](https://www.jamstec.go.jp/e/),
-which studies climate and works on forecasting it.
+The project is developed by the [Japan Agency for Marine-Earth Science and Technology (JAMSTEC)](https://www.jamstec.go.jp/e/) to support interactive visualization of scientific data related to the ocean, atmosphere, climate, and Earth sciences.
 
 ## Project installation & development
 
@@ -24,7 +24,7 @@ Run the library watcher and demo app:
 ```bash
 git clone https://github.com/JAMSTEC-SPDX/react-earth
 cd react-earth
-npm install
+npm ci
 npm run dev
 ```
 
