@@ -46,7 +46,11 @@ const useSvgController = (
     globeSvg.selectAll("*").remove();
 
     // Sphere
-    globeSvg.append("path").datum(SPHERE).attr("fill", "rgba(0, 0, 5, 0.6)");
+    globeSvg
+      .append("path")
+      .attr("class", "globe")
+      .datum(SPHERE)
+      .attr("fill", "rgba(0, 0, 5, 0.6)");
 
     // Coastlines
     globeSvg
