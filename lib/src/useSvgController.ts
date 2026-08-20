@@ -1,13 +1,11 @@
 import { useRef, useLayoutEffect, useState } from "react";
 
 import * as d3 from "d3";
-import { geoPath, type GeoPermissibleObjects, type GeoSphere } from "d3-geo";
+import { geoPath, type GeoPermissibleObjects } from "d3-geo";
 import type { LineString, Point } from "geojson";
 
 import type { View, Projection, Marker, CoastlinesByLOD } from "./types";
 import { createProjection } from "./utils/projections";
-
-const SPHERE: GeoSphere = { type: "Sphere" };
 
 type SvgController = {
   changeProjection: (
@@ -44,13 +42,6 @@ const useSvgController = (
     // **********************
     const globeSvg = d3.select<SVGSVGElement, unknown>(svg);
     globeSvg.selectAll("*").remove();
-
-    // Sphere
-    globeSvg
-      .append("path")
-      .attr("class", "globe")
-      .datum(SPHERE)
-      .attr("fill", "rgba(0, 0, 5, 0.6)");
 
     // Coastlines
     globeSvg
@@ -142,7 +133,7 @@ const useSvgController = (
       const path = geoPath<SVGPathElement, GeoPermissibleObjects>().projection(
         projectionRef.current!,
       );
-     allSvg.attr("d", path);
+      allSvg.attr("d", path);
       moveMarker();
     };
 
