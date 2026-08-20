@@ -24,6 +24,8 @@ export {
   default as interpolateField,
   bilinearInterpolateScalar,
   bilinearInterpolateVector,
+  getScalarValue,
+  getVectorValue,
 } from "./interpolateField";
 
 export default Earth;

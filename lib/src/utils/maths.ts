@@ -18,11 +18,6 @@ export function floorMod(a: number, n: number) {
   return m === n ? 0 : m;
 }
 
-/** Returns true if the specified value is not null and not undefined. */
-export function isValue<T>(x: T | null | undefined) {
-  return x !== null && x !== undefined;
-}
-
 /** Computes the magnitude (speed) of a 2D vector from its components, representing its physical intensity or strength */
 export function magnitude(vector: Vector) {
   const [u, v] = vector;
