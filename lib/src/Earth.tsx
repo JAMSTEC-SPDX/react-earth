@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, type PropsWithChildren } from "react";
+import {
+  type RefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  type PropsWithChildren,
+} from "react";
 
 import { TRANSPARENT_BLACK } from "./consts";
 import GlobeController from "./GlobeController";
@@ -24,7 +30,10 @@ type EarthProps = PropsWithChildren<{
   coastlines?: CoastlinesByLOD;
   globeController: GlobeController;
   projection: Projection;
-  overlayToolBox: OverlayToolBox<Vector> | OverlayToolBox<number> | null;
+  overlayVersion: number;
+  overlayToolBoxRef: RefObject<
+    OverlayToolBox<Vector> | OverlayToolBox<number> | null
+  >;
   getColor: (value: number, alpha?: number | undefined) => RGBAColor;
   streamInterpolate?: VectorInterpolate | null;
   marker?: Marker;
@@ -36,7 +45,8 @@ const Earth = ({
   coastlines,
   globeController,
   projection,
-  overlayToolBox,
+  overlayVersion,
+  overlayToolBoxRef,
   getColor,
   streamInterpolate,
   marker,
@@ -146,23 +156,21 @@ const Earth = ({
   // * On data change   *
   // ********************
   useEffect(() => {
-    if (!overlayToolBox) overlayController?.deactivateOverlay();
-  }, [overlayToolBox]);
-
-  useEffect(() => {
     resetVectorAnimator();
   }, [streamInterpolate]);
 
   useEffect(() => {
-    if (!overlayController || !overlayToolBox) {
+    if (
+      !overlayController ||
+      !overlayToolBoxRef ||
+      !overlayToolBoxRef.current
+    ) {
       overlayController?.deactivateOverlay();
       return;
     }
 
-    const {
-      overlayData,
-      grid: { nx, ny },
-    } = overlayToolBox;
+    const { overlayData, grid } = overlayToolBoxRef.current;
+    const { nx, ny } = grid;
 
     // Create a buffer of colors RGBA from the overlay data, which corresponds
     // to the texture for the webGL overlay
@@ -174,13 +182,13 @@ const Earth = ({
     }
 
     overlayController.setupTexture(colorData, nx, ny);
-    overlayController.setupGrid(overlayToolBox.grid);
+    overlayController.setupGrid(grid);
     overlayController.drawOverlay(
       projection,
       rotationRef.current,
       scaleRef.current,
     );
-  }, [getColor, overlayToolBox]);
+  }, [getColor, overlayVersion]);
 
   // *********************************************
   // * On projection change or window resize     *
