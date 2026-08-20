@@ -3,6 +3,8 @@ import { useState, useEffect, useMemo } from "react";
 import {
   bilinearInterpolateScalar,
   bilinearInterpolateVector,
+  getScalarValue,
+  getVectorValue,
   interpolateField,
   type Vector,
 } from "@jamstec-spdx/react-earth";
@@ -18,13 +20,16 @@ function interpolateVectorField(json: RawData) {
 
   const uData = json[0].data;
   const vData = json[1].data;
+  const size = uData.length;
+  const data = new Float32Array(size * 2);
 
-  const data: (Vector | null)[] = uData.map((_, i) =>
-    isValue(uData[i]) && isValue(vData[i]) ? [uData[i], vData[i]] : null,
-  );
+  for (let i = 0; i < size; i++) {
+    data[i] = uData[i] ?? NaN;
+    data[size + i] = vData[i] ?? NaN;
+  }
 
   return interpolateField(grid, {
-    data,
+    getValue: getVectorValue(data, grid),
     bilinearInterpolateFunc: bilinearInterpolateVector,
   });
 }
@@ -40,15 +45,18 @@ function parseRawData(
   const grid = json[0].header;
 
   if (isScalar(fieldType)) {
+    const data = Float32Array.from(json[0].data, (value) =>
+      value === null ? NaN : value,
+    );
     const interpolate = interpolateField(grid, {
-      data: json[0].data,
+      getValue: getScalarValue(data, grid),
       bilinearInterpolateFunc: bilinearInterpolateScalar,
     });
 
     return {
       grid,
       dataType: fieldType,
-      overlayData: json[0].data,
+      overlayData: data,
       getScalarForOverlay: (λ: number, φ: number) => interpolate(λ, φ),
       interpolate,
     };
@@ -58,16 +66,14 @@ function parseRawData(
 
   const uData = json[0].data;
   const vData = json[1].data;
-  const overlayData = [];
+  const overlayData = new Float32Array(uData.length);
 
   for (let i = 0; i < uData.length; i++) {
-    const uValue = uData[i];
-    const vValue = vData[i];
-    overlayData.push(
-      uValue !== null && vValue !== null
-        ? Math.sqrt(uValue * uValue + vValue * vValue)
-        : null,
-    );
+    const u = uData[i];
+    const v = vData[i];
+
+    overlayData[i] =
+      !Number.isNaN(u) && !Number.isNaN(v) ? Math.sqrt(u * u + v * v) : NaN;
   }
 
   const interpolate = interpolateVectorField(json);

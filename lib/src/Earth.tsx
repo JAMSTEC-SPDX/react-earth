@@ -168,7 +168,7 @@ const Earth = ({
     const colorData = new Float32Array(overlayData.length * 4);
     for (let i = 0; i < overlayData.length; i++) {
       const value = overlayData[i];
-      const color = value !== null ? getColor(value) : TRANSPARENT_BLACK;
+      const color = Number.isNaN(value) ? TRANSPARENT_BLACK : getColor(value);
       setPixelColor(colorData, i, color);
     }
 

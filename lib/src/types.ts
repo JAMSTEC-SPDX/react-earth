@@ -56,12 +56,12 @@ export type GridParams = {
 
 export type OverlayToolBox<T> = {
   grid: GridParams;
-  overlayData: (number | null)[];
+  overlayData: Float32Array;
   interpolate: (λ: number, φ: number) => T | null;
 };
 
 export type BilinearInterpolatedGrid<T> = {
-  data: (T | null)[];
+  getValue: (i: number, j: number) => T | null;
   bilinearInterpolateFunc: (
     x: number,
     y: number,

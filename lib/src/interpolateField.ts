@@ -1,9 +1,25 @@
 import type { BilinearInterpolatedGrid, OverlayToolBox, Vector } from "./types";
-import { floorMod, isValue } from "./utils/maths";
+import { floorMod } from "./utils/maths";
 
 // **************************
 // * Scalar data
 // **************************
+
+export function getScalarValue(
+  data: Float32Array,
+  gridSettings: OverlayToolBox<number>["grid"],
+): (i: number, j: number) => number | null {
+  const { dx: Δλ } = gridSettings; // distance between points on the longitude axis (degree)
+  const { nx: ni, ny: nj } = gridSettings; // number of grid points W-E and N-S (e.g., 144 x 73)
+  const isContinuous = Math.floor(ni * Δλ) >= 360;
+
+  return function (i: number, j: number) {
+    const wrappedI = isContinuous && i === ni ? 0 : i;
+    if (j < 0 || j >= nj || wrappedI < 0 || wrappedI >= ni) return null;
+    const value = data[j * ni + wrappedI];
+    return Number.isNaN(value) ? null : value;
+  };
+}
 
 export function bilinearInterpolateScalar(
   x: number,
@@ -21,6 +37,28 @@ export function bilinearInterpolateScalar(
 // **************************
 // * Vector data
 // **************************
+
+export function getVectorValue(
+  data: Float32Array,
+  gridSettings: OverlayToolBox<Vector>["grid"],
+): (i: number, j: number) => Vector | null {
+  const { dx: Δλ } = gridSettings; // distance between points on the longitude axis (degree)
+  const { nx: ni, ny: nj } = gridSettings; // number of grid points W-E and N-S (e.g., 144 x 73)
+  const isContinuous = Math.floor(ni * Δλ) >= 360;
+  const offset = ni * nj;
+
+  return function (i: number, j: number) {
+    const wrappedI = isContinuous && i === ni ? 0 : i;
+    if (j < 0 || j >= nj || wrappedI < 0 || wrappedI >= ni) return null;
+
+    const index = j * ni + wrappedI;
+
+    const u = data[index];
+    const v = data[offset + index];
+
+    return Number.isNaN(u) || Number.isNaN(v) ? null : [u, v];
+  };
+}
 
 export function bilinearInterpolateVector(
   x: number,
@@ -44,33 +82,15 @@ export function bilinearInterpolateVector(
 /** For grid settings and a bilinear interpolated grid, returns the interpolation function on the data. */
 export default function interpolateField<T>(
   gridSettings: OverlayToolBox<T>["grid"],
-  { data, bilinearInterpolateFunc }: BilinearInterpolatedGrid<T>,
+  { getValue, bilinearInterpolateFunc }: BilinearInterpolatedGrid<T>,
 ) {
   const { lon0: λ0, lat0: φ0 } = gridSettings; // the grid's origin (e.g., 0.0E, 90.0N)
   const { dx: Δλ, dy: Δφ } = gridSettings; // distance between grid points (e.g., 2.5 deg lon, 2.5 deg lat)
-  const { nx: ni, ny: nj } = gridSettings; // number of grid points W-E and N-S (e.g., 144 x 73)
+  const { ny: nj } = gridSettings; // number of grid points W-E and N-S (e.g., 144 x 73)
 
   const latMin = Math.min(φ0, φ0 - (nj - 1) * Δφ);
   const latMax = Math.max(φ0, φ0 - (nj - 1) * Δφ);
 
-  // 1. transform the raw data in grid lon/lat
-  // Scan mode 0 assumed. Longitude increases from λ0, and latitude decreases from φ0.
-  // http://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_table3-4.shtml
-  const grid: (T | null)[][] = [];
-  let p = 0;
-  const isContinuous = Math.floor(ni * Δλ) >= 360;
-  for (let j = 0; j < nj; j++) {
-    const row: (T | null)[] = [];
-    for (let i = 0; i < ni; i++, p++) {
-      row.push(data[p]);
-    }
-    if (isContinuous) {
-      row.push(row[0]);
-    }
-    grid[j] = row;
-  }
-
-  // 2. create interpolation function
   function interpolate(λ: number, φ: number) {
     if (φ < latMin || φ > latMax) return null;
 
@@ -89,16 +109,14 @@ export default function interpolateField<T>(
     const fi = Math.floor(i);
     const fj = Math.floor(j);
 
-    if (grid[fj] && grid[fj + 1]) {
-      const g00 = grid[fj][fi];
-      const g10 = grid[fj][fi + 1];
-      const g01 = grid[fj + 1][fi];
-      const g11 = grid[fj + 1][fi + 1];
-      if ([g00, g01, g10, g11].every(isValue)) {
-        return bilinearInterpolateFunc(i - fi, j - fj, g00!, g10!, g01!, g11!);
-      }
-    }
-    return null;
+    const g00 = getValue(fi, fj);
+    const g10 = getValue(fi + 1, fj);
+    const g01 = getValue(fi, fj + 1);
+    const g11 = getValue(fi + 1, fj + 1);
+
+    if (g00 == null || g10 == null || g01 == null || g11 == null) return null;
+
+    return bilinearInterpolateFunc(i - fi, j - fj, g00, g10, g01, g11);
   }
 
   return interpolate;
