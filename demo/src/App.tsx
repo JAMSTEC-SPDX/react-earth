@@ -2,7 +2,6 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type Dispatch,
   type SetStateAction,
@@ -57,12 +56,18 @@ const EarthView = ({
     () => config[!isSecondary ? "param1" : "param2"],
     [isSecondary, config],
   );
-  const { overlayToolBox, streamInterpolate } = useDataToolBox(param);
+  const {
+    overlayVersion,
+    overlayToolBoxRef,
+    fieldType,
+    error,
+    streamInterpolate,
+  } = useDataToolBox(param);
 
-  const getColor = useMemo(() => {
-    const fieldType = overlayToolBox?.dataType || "wind";
-    return getColorScale(fieldType, colorScaleBounds);
-  }, [overlayToolBox?.dataType, colorScaleBounds]);
+  const getColor = useMemo(
+    () => getColorScale(fieldType, colorScaleBounds),
+    [fieldType, colorScaleBounds],
+  );
 
   useEffect(() => {
     const newColorScaleBounds = getColorScaleBounds(param);
@@ -74,21 +79,22 @@ const EarthView = ({
   // ********************
   const [marker, setMarker] = useState<ExtendedMarker>();
 
-  // use a ref for overlayToolBox to avoid re-subscribing
-  // interaction listeners on every change
-  const overlayToolBoxRef = useRef(overlayToolBox);
   useEffect(() => {
-    overlayToolBoxRef.current = overlayToolBox;
-    if (!overlayToolBox) setMarker(undefined);
-  }, [overlayToolBox]);
-
-  const selectMarker = useCallback((λ: number, φ: number) => {
     if (!overlayToolBoxRef.current) setMarker(undefined);
-    else {
-      const newMarker = getMarkerData(λ, φ, overlayToolBoxRef.current);
-      setMarker(newMarker);
-    }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [overlayVersion]);
+
+  const selectMarker = useCallback(
+    (λ: number, φ: number) => {
+      if (!overlayToolBoxRef.current) setMarker(undefined);
+      else {
+        const newMarker = getMarkerData(λ, φ, overlayToolBoxRef.current);
+        setMarker(newMarker);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [overlayVersion],
+  );
 
   const removeMarker = useCallback(() => {
     setMarker(undefined);
@@ -100,21 +106,22 @@ const EarthView = ({
         coastlines={coastlines}
         globeController={globeController}
         projection={config.projection}
-        overlayToolBox={overlayToolBox ?? null}
+        overlayVersion={overlayVersion}
+        overlayToolBox={overlayToolBoxRef}
         getColor={getColor}
         streamInterpolate={streamInterpolate}
         marker={marker}
         selectMarker={selectMarker}
         removeMarker={removeMarker}
       >
-        {overlayToolBox === null && <ErrorMessageNotice />}
+        {overlayVersion > 0 && error && <ErrorMessageNotice />}
       </Earth>
       <div className="floating-panels">
         <MarkerPanel marker={marker} removeMarker={removeMarker} />
         <EarthMenu
           config={config}
           setConfig={setConfig}
-          validConfig={overlayToolBox !== null}
+          validConfig={!error}
           colorScaleBounds={colorScaleBounds}
           isSecondary={isSecondary}
           updateColorScaleBounds={setColorScaleBounds}

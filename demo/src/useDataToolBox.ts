@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 
 import {
   bilinearInterpolateScalar,
@@ -95,10 +95,12 @@ function parseRawData(
 // **************************
 
 export default function useDataToolBox(param: FieldType) {
-  // overlayToolBox is undefined before the initial load and becomes null when no data is available.
-  const [overlayToolBox, setOverlayToolBox] = useState<
+  const overlayToolBoxRef = useRef<
     ExtendedOverlayToolBox<Vector> | ExtendedOverlayToolBox<number> | null
-  >();
+  >(null);
+  const [overlayVersion, setOverlayVersion] = useState(0);
+  const [fieldType, setFieldType] = useState<FieldType>("wind");
+  const [error, setError] = useState(false);
   const [streamInterpolate, setStreamInterpolate] = useState<
     ((λ: number, φ: number) => Vector | null) | null
   >(null);
@@ -122,8 +124,9 @@ export default function useDataToolBox(param: FieldType) {
     };
 
     const updateOverlay = async () => {
+      setError(false);
       const overlayData = await fetchOverlayData(param);
-      setOverlayToolBox(overlayData);
+      overlayToolBoxRef.current = overlayData;
 
       if (
         overlayData?.dataType === "wind" ||
@@ -136,13 +139,23 @@ export default function useDataToolBox(param: FieldType) {
       } else {
         setStreamInterpolate(null);
       }
+
+      setFieldType(overlayData?.dataType ?? "wind");
+      setError(overlayData === null);
+      setOverlayVersion((prev) => prev + 1);
     };
 
     updateOverlay();
   }, [param]);
 
   return useMemo(
-    () => ({ overlayToolBox, streamInterpolate }),
-    [overlayToolBox, streamInterpolate],
+    () => ({
+      overlayVersion,
+      overlayToolBoxRef,
+      fieldType,
+      error,
+      streamInterpolate,
+    }),
+    [overlayVersion, fieldType, error, streamInterpolate],
   );
 }
