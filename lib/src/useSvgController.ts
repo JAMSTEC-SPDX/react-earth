@@ -81,6 +81,10 @@ const useSvgController = (
       .attr("stroke", "#707070")
       .attr("stroke-width", 1.25);
 
+    const allSvg = globeSvg.selectAll<SVGPathElement, GeoPermissibleObjects>(
+      "path",
+    );
+
     // **************
     // * SVG update *
     // **************
@@ -138,9 +142,7 @@ const useSvgController = (
       const path = geoPath<SVGPathElement, GeoPermissibleObjects>().projection(
         projectionRef.current!,
       );
-      globeSvg
-        .selectAll<SVGPathElement, GeoPermissibleObjects>("path")
-        .attr("d", path);
+     allSvg.attr("d", path);
       moveMarker();
     };
 
