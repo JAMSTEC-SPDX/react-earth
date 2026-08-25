@@ -3,7 +3,7 @@ import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import type { ColorScaleBounds } from "@jamstec-spdx/react-earth";
 
 import ColorScale from "./ColorScale";
-import type { Config } from "./types";
+import type { Config, FieldType } from "./types";
 
 type MenuRowProps = {
   setting: string;
@@ -45,6 +45,7 @@ type EarthMenuProps = {
   colorScaleBounds: ColorScaleBounds;
   isSecondary: boolean;
   setConfig: Dispatch<SetStateAction<Config>>;
+  updateData: (param: FieldType) => Promise<void>;
   updateColorScaleBounds: Dispatch<SetStateAction<ColorScaleBounds>>;
 };
 
@@ -54,6 +55,7 @@ const EarthMenu = ({
   colorScaleBounds,
   isSecondary = false,
   setConfig,
+  updateData,
   updateColorScaleBounds,
 }: EarthMenuProps) => {
   const [open, setOpen] = useState(false);
@@ -100,9 +102,10 @@ const EarthMenu = ({
           setting="overlay"
           options={["wind", "current", "temperature"]}
           selected={config[paramKey]}
-          onClick={(option: string) =>
-            updateConfig(!isSecondary ? "param1" : "param2", option)
-          }
+          onClick={(option: string) => {
+            updateConfig(!isSecondary ? "param1" : "param2", option);
+            updateData(option as FieldType);
+          }}
         />
         {validConfig && (
           <ColorScale

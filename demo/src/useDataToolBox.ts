@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 
 import {
   bilinearInterpolateScalar,
@@ -94,52 +94,39 @@ function parseRawData(
 // * useDataToolBox         *
 // **************************
 
-export default function useDataToolBox(param: FieldType) {
+export default function useDataToolBox() {
   // overlayToolBox is undefined before the initial load and becomes null when no data is available.
   const [overlayToolBox, setOverlayToolBox] =
     useState<ExtendedOverlayToolBox | null>();
   const [streamInterpolate, setStreamInterpolate] =
     useState<VectorInterpolate | null>(null);
 
-  const fetchData = async (param: FieldType) => {
-    const filename = `${import.meta.env.BASE_URL}data/${param}_data.json`;
-    const res = await fetch(filename);
-    if (!res.ok) throw new Error(`Failed to load file: ${filename}`);
-    return res.json();
-  };
+  const updateData = useCallback(async (param: FieldType) => {
+    let overlayData: ExtendedOverlayToolBox | null = null;
 
-  useEffect(() => {
-    const fetchOverlayData = async (param: FieldType) => {
-      try {
-        const rawData = await fetchData(param);
-        return parseRawData(rawData, param);
-      } catch (e) {
-        console.error(e);
-        return null;
-      }
-    };
+    try {
+      const filename = `${import.meta.env.BASE_URL}data/${param}_data.json`;
+      const res = await fetch(filename);
 
-    const updateOverlay = async () => {
-      const overlayData = await fetchOverlayData(param);
-      setOverlayToolBox(overlayData);
+      if (!res.ok) throw new Error(`Failed to load file: ${filename}`);
+      const rawData = await res.json();
 
-      if (
-        overlayData?.dataType === "wind" ||
-        overlayData?.dataType === "current"
-      ) {
-        setStreamInterpolate(
-          () => overlayData.interpolate as VectorInterpolate,
-        );
-      } else {
-        setStreamInterpolate(null);
-      }
-    };
+      overlayData = parseRawData(rawData, param);
+    } catch (e) {
+      console.error(e);
+    }
 
-    updateOverlay();
-  }, [param]);
+    setOverlayToolBox(overlayData);
+
+    setStreamInterpolate(
+      overlayData?.dataType === "wind" || overlayData?.dataType === "current"
+        ? () => overlayData.interpolate as VectorInterpolate
+        : null,
+    );
+  }, []);
 
   return useMemo(
-    () => ({ overlayToolBox, streamInterpolate }),
-    [overlayToolBox, streamInterpolate],
+    () => ({ overlayToolBox, streamInterpolate, updateData }),
+    [overlayToolBox, streamInterpolate, updateData],
   );
 }
