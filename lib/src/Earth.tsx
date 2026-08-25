@@ -35,7 +35,8 @@ type EarthProps = PropsWithChildren<{
     OverlayToolBox<Vector> | OverlayToolBox<number> | null
   >;
   getColor: (value: number, alpha?: number | undefined) => RGBAColor;
-  streamInterpolate?: VectorInterpolate | null;
+  streamVersion?: number;
+  streamInterpolateRef?: RefObject<VectorInterpolate | null>;
   marker?: Marker;
   selectMarker?: (λ: number, φ: number) => void;
   removeMarker?: () => void;
@@ -48,7 +49,8 @@ const Earth = ({
   overlayVersion,
   overlayToolBoxRef,
   getColor,
-  streamInterpolate,
+  streamVersion,
+  streamInterpolateRef,
   marker,
   selectMarker,
   removeMarker,
@@ -81,8 +83,6 @@ const Earth = ({
   viewRef.current = view;
   const projectionRef = useRef<Projection>(projection);
   projectionRef.current = projection;
-  const streamInterpolateRef = useRef(streamInterpolate);
-  streamInterpolateRef.current = streamInterpolate;
 
   useEffect(() => {
     if (svgController && coastlines) {
@@ -104,7 +104,7 @@ const Earth = ({
     vectorAnimatorRef.current?.stop();
 
     const animationCtx = vectorCanvasRef.current?.getContext("2d");
-    if (!streamInterpolateRef.current || !animationCtx) return;
+    if (!streamInterpolateRef?.current || !animationCtx) return;
 
     // rotate and scale projection, then compute vector field
     const p = createProjection(viewRef.current, projectionRef.current);
@@ -157,7 +157,7 @@ const Earth = ({
   // ********************
   useEffect(() => {
     resetVectorAnimator();
-  }, [streamInterpolate]);
+  }, [streamVersion]);
 
   useEffect(() => {
     if (
