@@ -59,7 +59,8 @@ const EarthView = ({
   const {
     overlayVersion,
     overlayToolBoxRef,
-    streamInterpolate,
+    streamVersion,
+    streamInterpolateRef,
     fieldType,
     error,
     updateData,
@@ -120,7 +121,8 @@ const EarthView = ({
         overlayVersion={overlayVersion}
         overlayToolBoxRef={overlayToolBoxRef}
         getColor={getColor}
-        streamInterpolate={streamInterpolate}
+        streamVersion={streamVersion}
+        streamInterpolateRef={streamInterpolateRef}
         marker={marker}
         selectMarker={selectMarker}
         removeMarker={removeMarker}

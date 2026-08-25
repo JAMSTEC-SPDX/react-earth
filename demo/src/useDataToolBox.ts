@@ -98,8 +98,8 @@ export default function useDataToolBox() {
   const overlayToolBoxRef = useRef<ExtendedOverlayToolBox | null>(null);
   const [overlayVersion, setOverlayVersion] = useState(0);
 
-  const [streamInterpolate, setStreamInterpolate] =
-    useState<VectorInterpolate | null>(null);
+  const [streamVersion, setStreamVersion] = useState(0);
+  const streamInterpolateRef = useRef<VectorInterpolate | null>(null);
 
   const [fieldType, setFieldType] = useState<FieldType>("wind");
   const [error, setError] = useState(false);
@@ -121,14 +121,16 @@ export default function useDataToolBox() {
 
     overlayToolBoxRef.current = overlayData;
 
-    setStreamInterpolate(
+    streamInterpolateRef.current =
       overlayData?.dataType === "wind" || overlayData?.dataType === "current"
-        ? () => overlayData.interpolate as VectorInterpolate
-        : null,
-    );
+        ? (overlayData.interpolate as VectorInterpolate)
+        : null;
+
     setFieldType(overlayData?.dataType ?? "wind");
     setError(overlayData === null);
+
     setOverlayVersion((prev) => prev + 1);
+    setStreamVersion((prev) => prev + 1);
   }, []);
 
   return useMemo(
@@ -136,10 +138,13 @@ export default function useDataToolBox() {
       updateData,
       overlayVersion,
       overlayToolBoxRef,
-      streamInterpolate,
+
+      streamVersion,
+      streamInterpolateRef,
+
       fieldType,
       error,
     }),
-    [updateData, overlayVersion, streamInterpolate, fieldType, error],
+    [updateData, overlayVersion, streamVersion, fieldType, error],
   );
 }
