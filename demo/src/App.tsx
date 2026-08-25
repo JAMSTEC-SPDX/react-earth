@@ -57,7 +57,12 @@ const EarthView = ({
     () => config[!isSecondary ? "param1" : "param2"],
     [isSecondary, config],
   );
-  const { overlayToolBox, streamInterpolate } = useDataToolBox(param);
+  const { overlayToolBox, streamInterpolate, updateData } = useDataToolBox();
+
+  useEffect(() => {
+    updateData(param);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getColor = useMemo(() => {
     const fieldType = overlayToolBox?.dataType || "wind";
@@ -117,6 +122,7 @@ const EarthView = ({
           validConfig={overlayToolBox !== null}
           colorScaleBounds={colorScaleBounds}
           isSecondary={isSecondary}
+          updateData={updateData}
           updateColorScaleBounds={setColorScaleBounds}
         />
       </div>
