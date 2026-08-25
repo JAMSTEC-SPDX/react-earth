@@ -7,6 +7,7 @@ import {
   getVectorValue,
   interpolateField,
   type Vector,
+  type VectorInterpolate,
 } from "@jamstec-spdx/react-earth";
 
 import type { ExtendedOverlayToolBox, FieldType, RawData } from "./types";
@@ -99,9 +100,8 @@ export default function useDataToolBox(param: FieldType) {
   const [overlayToolBox, setOverlayToolBox] = useState<
     ExtendedOverlayToolBox<Vector> | ExtendedOverlayToolBox<number> | null
   >();
-  const [streamInterpolate, setStreamInterpolate] = useState<
-    ((λ: number, φ: number) => Vector | null) | null
-  >(null);
+  const [streamInterpolate, setStreamInterpolate] =
+    useState<VectorInterpolate | null>(null);
 
   const fetchData = async (param: FieldType) => {
     const filename = `${import.meta.env.BASE_URL}data/${param}_data.json`;
@@ -130,8 +130,7 @@ export default function useDataToolBox(param: FieldType) {
         overlayData?.dataType === "current"
       ) {
         setStreamInterpolate(
-          () =>
-            overlayData.interpolate as (λ: number, φ: number) => Vector | null,
+          () => overlayData.interpolate as VectorInterpolate,
         );
       } else {
         setStreamInterpolate(null);

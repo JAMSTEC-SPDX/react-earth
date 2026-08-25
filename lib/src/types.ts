@@ -80,3 +80,5 @@ export type BilinearInterpolatedGrid<T> = {
 
 export type VectorValue = [number, number, number | null];
 export type VectorField = VectorValue[][];
+
+export type VectorInterpolate = (λ: number, φ: number) => Vector | null;

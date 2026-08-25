@@ -16,6 +16,7 @@ export type {
   OverlayToolBox,
   Projection,
   Vector,
+  VectorInterpolate,
   View,
 } from "./types";
 

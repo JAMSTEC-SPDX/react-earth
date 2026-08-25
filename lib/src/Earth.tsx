@@ -8,6 +8,7 @@ import type {
   OverlayToolBox,
   Projection,
   Vector,
+  VectorInterpolate,
   View,
 } from "./types";
 import useOverlayController from "./useOverlayController";
@@ -25,7 +26,7 @@ type EarthProps = PropsWithChildren<{
   projection: Projection;
   overlayToolBox: OverlayToolBox<Vector> | OverlayToolBox<number> | null;
   getColor: (value: number, alpha?: number | undefined) => RGBAColor;
-  streamInterpolate?: ((λ: number, φ: number) => Vector | null) | null;
+  streamInterpolate?: VectorInterpolate | null;
   marker?: Marker;
   selectMarker?: (λ: number, φ: number) => void;
   removeMarker?: () => void;

@@ -11,6 +11,7 @@ import type {
   Vector,
   VectorValue,
   VectorField,
+  VectorInterpolate,
 } from "../types";
 
 /**
@@ -81,7 +82,7 @@ function distort(
  * image data adapted to the view and projection for the canvas.
  */
 export default function applyProjectionToVectorField(
-  interpolate: (λ: number, φ: number) => Vector | null,
+  interpolate: VectorInterpolate,
   projection: GeoProjection,
   projectionType: Projection,
   view: View,
