@@ -1,4 +1,5 @@
 import type {
+  GridParams,
   Marker,
   OverlayToolBox,
   Projection,
@@ -49,17 +50,7 @@ export type RawData = {
    * of elements should be `nx * ny`.
    */
   data: number[];
-  header: {
-    /** Number of grid points along the longitude and latitude axis */
-    nx: number;
-    ny: number;
-    /** Longitude and latitude of the first grid point (degrees) */
-    lon0: number;
-    lat0: number;
-    /** Grid spacing in the longitudinal and latitudinal direction (degrees) */
-    dx: number;
-    dy: number;
-  };
+  header: GridParams;
 }[];
 
 type ExtendedOverlayToolB<T> = OverlayToolBox<T> & {
