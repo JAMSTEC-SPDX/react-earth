@@ -3,9 +3,9 @@ import { useEffect } from "react";
 import type { ColorScaleBounds, Vector } from "@jamstec-spdx/react-earth";
 
 import type {
-  ExtendedOverlayToolBox,
   ExtendedMarker,
   ColorScaleBoundsInput,
+  ExtendedOverlayToolBox,
 } from "@/types";
 
 /** Executes the callback after the value changes and the specified delay has elapsed */
@@ -27,8 +27,7 @@ export const useDebounceFunc = <T = string | number>(
 export function getMarkerData(
   λ: number,
   φ: number,
-  overlayToolBox:
-    ExtendedOverlayToolBox<Vector> | ExtendedOverlayToolBox<number>,
+  overlayToolBox: ExtendedOverlayToolBox,
 ): ExtendedMarker {
   const { dataType, getScalarForOverlay, interpolate } = overlayToolBox;
   return {

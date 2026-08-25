@@ -62,10 +62,13 @@ export type RawData = {
   };
 }[];
 
-export type ExtendedOverlayToolBox<T> = OverlayToolBox<T> & {
+type ExtendedOverlayToolB<T> = OverlayToolBox<T> & {
   dataType: FieldType;
   getScalarForOverlay: (λ: number, φ: number) => number | null;
 };
+
+export type ExtendedOverlayToolBox =
+  ExtendedOverlayToolB<number> | ExtendedOverlayToolB<Vector>;
 
 export type ExtendedMarker = Marker & { type: FieldType } & (
     | {

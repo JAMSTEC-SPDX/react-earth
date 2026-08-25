@@ -6,7 +6,6 @@ import {
   getScalarValue,
   getVectorValue,
   interpolateField,
-  type Vector,
   type VectorInterpolate,
 } from "@jamstec-spdx/react-earth";
 
@@ -42,7 +41,7 @@ function interpolateVectorField(json: RawData) {
 function parseRawData(
   json: RawData,
   fieldType: FieldType,
-): ExtendedOverlayToolBox<number> | ExtendedOverlayToolBox<Vector> {
+): ExtendedOverlayToolBox {
   const grid = json[0].header;
 
   if (isScalar(fieldType)) {
@@ -97,9 +96,8 @@ function parseRawData(
 
 export default function useDataToolBox(param: FieldType) {
   // overlayToolBox is undefined before the initial load and becomes null when no data is available.
-  const [overlayToolBox, setOverlayToolBox] = useState<
-    ExtendedOverlayToolBox<Vector> | ExtendedOverlayToolBox<number> | null
-  >();
+  const [overlayToolBox, setOverlayToolBox] =
+    useState<ExtendedOverlayToolBox | null>();
   const [streamInterpolate, setStreamInterpolate] =
     useState<VectorInterpolate | null>(null);
 
