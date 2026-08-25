@@ -12,6 +12,7 @@ export { default as GlobeController } from "./GlobeController";
 export type {
   CoastlinesByLOD,
   ColorScaleBounds,
+  GridParams,
   Marker,
   OverlayToolBox,
   Projection,
