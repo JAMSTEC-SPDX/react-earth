@@ -31,6 +31,9 @@ jobs:
       - name: TypeScript check
         run: npm run typecheck
 
+      - name: Run test
+        run: npm run test
+
       - name: Build
         run: npm run build --workspaces
 
