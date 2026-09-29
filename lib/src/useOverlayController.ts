@@ -169,10 +169,10 @@ const useOverlayController = (
 
     void main() {
 
-      // - Convert lon/lat from [0,1] to [-π,π] and [-π/2,π/2]
+      // - Convert lon/lat from [0,1] to [0,2π] and [-π/2,π/2]
       // - Flip y to compensate for the opposite latitude orientation
       //   between the dataset and the sphere UV mapping
-      float lon = aUV.x * 2.0 * PI - PI;
+      float lon = aUV.x * 2.0 * PI;
       float lat = (1.0 - aUV.y) * PI - PI * 0.5;
 
       vLonLat = vec2(lon, lat);
@@ -327,6 +327,11 @@ const useOverlayController = (
 
       float rotatedLon = atan(rotatedP.x, rotatedP.z);
       float rotatedLat = asin(clamp(rotatedP.y, -1.0, 1.0));
+
+      // Convert lon from [-π,π] to [0,2π]
+      if (rotatedLon < 0.0) {
+        rotatedLon += 2.0 * PI;
+      }
 
       float lonDeg = degrees(rotatedLon);
       float latDeg = degrees(rotatedLat);
