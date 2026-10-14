@@ -2,13 +2,18 @@ import type { GeoProjection } from "d3-geo";
 
 import {
   VECTOR_INTENSITY_COLORS,
-  MAX_INTENSITY,
-  DEFAULT_MULTIPLIER,
   NULL_VECTOR,
   MAX_PARTICLE_AGE,
   PARTICLE_LINE_WIDTH,
+  DEFAULT_VECTOR_OPTIONS,
 } from "./consts";
-import type { ViewBounds, VectorValue, VectorField, View } from "./types";
+import type {
+  ViewBounds,
+  VectorValue,
+  VectorField,
+  View,
+  VectorAnimatorOptions,
+} from "./types";
 import { random } from "./utils/maths";
 import { getBounds } from "./utils/view";
 
@@ -34,14 +39,18 @@ export class VectorAnimator {
   private movingParticles: MovingParticle[][] = initMovingParticles(); // grouped by vector intensity
 
   private getVectorAtPosition: (x: number, y: number) => VectorValue;
-  private options: { maxIntensity: number; multiplier: number };
+  private options: {
+    maxIntensity: number;
+    particlesMultiplier: number;
+    vectorSpeedScale: number;
+  };
 
   constructor(
     ctx: CanvasRenderingContext2D,
     vectorField: VectorField,
     view: View,
     projection: GeoProjection,
-    options = { maxIntensity: MAX_INTENSITY, multiplier: DEFAULT_MULTIPLIER },
+    options?: VectorAnimatorOptions,
   ) {
     this.ctx = ctx;
     this.getVectorAtPosition = function (x: number, y: number) {
@@ -53,7 +62,7 @@ export class VectorAnimator {
     };
     this.view = view;
     this.viewBounds = getBounds(view, projection);
-    this.options = options;
+    this.options = { ...DEFAULT_VECTOR_OPTIONS, ...options };
   }
 
   private speedIsDefined(x: number, y: number) {
@@ -72,6 +81,7 @@ export class VectorAnimator {
 
   /** map vector speed to a group, in order to apply its style */
   private getVectorIntensityGroupIndex(m: number) {
+    const MAX_INTENSITY = this.options.maxIntensity;
     return Math.max(
       Math.floor(
         (Math.min(m, MAX_INTENSITY) / MAX_INTENSITY) *
@@ -83,7 +93,7 @@ export class VectorAnimator {
 
   private initParticles() {
     const particleCount = Math.round(
-      this.viewBounds.width * this.options.multiplier,
+      this.viewBounds.width * this.options.particlesMultiplier,
     );
 
     this.particles = [];
@@ -96,6 +106,7 @@ export class VectorAnimator {
 
   private evolve() {
     const movingParticles: MovingParticle[][] = initMovingParticles();
+    const vectorSpeedScale = this.options.vectorSpeedScale;
 
     this.particles.forEach((p, index) => {
       if (p.age > MAX_PARTICLE_AGE) {
@@ -109,8 +120,8 @@ export class VectorAnimator {
         return;
       }
 
-      const xt = p.x + v[0];
-      const yt = p.y + v[1];
+      const xt = p.x + v[0] * vectorSpeedScale;
+      const yt = p.y + v[1] * vectorSpeedScale;
 
       if (this.speedIsDefined(xt, yt)) {
         // Path from (x,y) to (xt,yt) is visible, so add this particle to the appropriate draw bucket.

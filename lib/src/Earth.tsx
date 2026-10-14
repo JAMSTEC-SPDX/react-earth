@@ -14,6 +14,7 @@ import type {
   OverlayToolBox,
   Projection,
   Vector,
+  VectorAnimatorOptions,
   VectorInterpolate,
   View,
 } from "./types";
@@ -37,6 +38,7 @@ type EarthProps = PropsWithChildren<{
   getColor: (value: number, alpha?: number | undefined) => RGBAColor;
   streamVersion?: number;
   streamInterpolateRef?: RefObject<VectorInterpolate | null>;
+  vectorAnimatorOptions?: VectorAnimatorOptions;
   marker?: Marker;
   selectMarker?: (λ: number, φ: number) => void;
   removeMarker?: () => void;
@@ -51,6 +53,7 @@ const Earth = ({
   getColor,
   streamVersion,
   streamInterpolateRef,
+  vectorAnimatorOptions,
   marker,
   selectMarker,
   removeMarker,
@@ -123,6 +126,7 @@ const Earth = ({
       vectorField,
       viewRef.current,
       p,
+      vectorAnimatorOptions,
     );
     vectorAnimatorRef.current = animator;
     animator.start();
@@ -130,7 +134,7 @@ const Earth = ({
     return () => {
       animator.stop();
     };
-  }, []);
+  }, [vectorAnimatorOptions]);
 
   // ********************
   // * First render     *
@@ -212,10 +216,10 @@ const Earth = ({
   // ********************
   // * Interactions     *
   // ********************
-  useEffect(() => {
-    if (!svgController) return;
 
-    const handleClick = (event: PointerEvent) => {
+  const handleClick = useCallback(
+    (event: PointerEvent) => {
+      if (!svgController) return;
       if (!globeSvgRef.current || !selectMarker || !removeMarker) return;
 
       const rect = globeSvgRef.current.getBoundingClientRect();
@@ -234,22 +238,28 @@ const Earth = ({
           selectMarker(λ, φ);
         }
       }
-    };
+    },
+    [svgController],
+  );
 
-    const updateLayout = () => {
-      // clear animation before dragging or zooming
-      vectorAnimatorRef.current?.stop();
+  const updateLayout = useCallback(() => {
+    if (!svgController) return;
+    // clear animation before dragging or zooming
+    vectorAnimatorRef.current?.stop();
 
-      rotationRef.current = globeController.rotation;
-      scaleRef.current = globeController.scale;
+    rotationRef.current = globeController.rotation;
+    scaleRef.current = globeController.scale;
 
-      svgController.updateProjection(scaleRef.current, rotationRef.current);
-      overlayController?.drawOverlay(
-        projectionRef.current,
-        rotationRef.current,
-        scaleRef.current,
-      );
-    };
+    svgController.updateProjection(scaleRef.current, rotationRef.current);
+    overlayController?.drawOverlay(
+      projectionRef.current,
+      rotationRef.current,
+      scaleRef.current,
+    );
+  }, [svgController]);
+
+  useEffect(() => {
+    if (!svgController) return;
 
     const unsubscribeGlobeController = globeController.subscribe(globeSvgRef, {
       handleClick,
@@ -264,7 +274,7 @@ const Earth = ({
     });
 
     return () => unsubscribeGlobeController();
-  }, [svgController]);
+  }, [svgController, handleClick, updateLayout, resetVectorAnimator]);
 
   useEffect(() => {
     if (svgController) {
