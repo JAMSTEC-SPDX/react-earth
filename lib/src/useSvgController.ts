@@ -65,6 +65,7 @@ const useSvgController = (
     const graticule = d3.geoGraticule();
     globeSvg
       .append("path")
+      .attr("class", "graticules")
       .datum(graticule())
       .attr("fill", "none")
       .attr("stroke", "rgba(200,200,200,0.4)")
@@ -76,6 +77,7 @@ const useSvgController = (
     };
     globeSvg
       .append("path")
+      .attr("class", "equator")
       .datum(equator)
       .attr("fill", "none")
       .attr("stroke", "#707070")
