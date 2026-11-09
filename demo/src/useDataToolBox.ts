@@ -122,7 +122,7 @@ export default function useDataToolBox() {
     overlayToolBoxRef.current = overlayData;
 
     streamInterpolateRef.current =
-      overlayData?.dataType === "wind" || overlayData?.dataType === "current"
+      overlayData?.dataType === "wind"
         ? (overlayData.interpolate as VectorInterpolate)
         : null;
 
