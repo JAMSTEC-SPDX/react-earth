@@ -1,5 +1,6 @@
 import type { FeatureCollection, Geometry } from "geojson";
-import { RGBAColor } from "./utils/colors";
+
+import type { RGBAColor } from "./utils/colors";
 
 // ***************************
 // * Configuration types     *

@@ -1,4 +1,11 @@
-import { useState, useMemo, useRef, useCallback } from "react";
+import {
+  useState,
+  useMemo,
+  useRef,
+  useCallback,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 
 import {
   bilinearInterpolateScalar,
@@ -6,6 +13,8 @@ import {
   getScalarValue,
   getVectorValue,
   interpolateField,
+  type ColorScaleBounds,
+  type GetColorFunc,
   type VectorInterpolate,
 } from "@jamstec-spdx/react-earth";
 
@@ -15,7 +24,11 @@ import type {
   FieldType,
   RawData,
 } from "./types";
-import { isScalar } from "./utils/fieldTypes";
+import {
+  getColorScale,
+  getColorScaleBounds,
+  isScalar,
+} from "./utils/fieldTypes";
 import { isValue, magnitude } from "./utils/maths";
 
 function interpolateVectorField(json: RawData) {
@@ -99,14 +112,16 @@ function parseRawData(
 // * useDataToolBox         *
 // **************************
 
-export default function useDataToolBox() {
+export default function useDataToolBox(
+  setColorScaleBounds: Dispatch<SetStateAction<ColorScaleBounds>>,
+  setGetColor: Dispatch<SetStateAction<GetColorFunc>>,
+) {
   const overlayToolBoxRef = useRef<ExtendedOverlayToolBox | null>(null);
   const [overlayVersion, setOverlayVersion] = useState(0);
 
   const [streamVersion, setStreamVersion] = useState(0);
   const streamInterpolateRef = useRef<VectorInterpolate | null>(null);
 
-  const [fieldType, setFieldType] = useState<FieldType>("wind");
   const [error, setError] = useState(false);
 
   const updateData = useCallback(
@@ -143,13 +158,18 @@ export default function useDataToolBox() {
           ? (overlayData.interpolate as VectorInterpolate)
           : null;
 
-      setFieldType(dataType ?? "wind");
+      if (dataType) {
+        const newColorScaleBounds = getColorScaleBounds(dataType);
+        setColorScaleBounds(newColorScaleBounds);
+        setGetColor(() => getColorScale(dataType, newColorScaleBounds));
+      }
+
       setError(overlayData === null);
 
       setOverlayVersion((prev) => prev + 1);
       setStreamVersion((prev) => prev + 1);
     },
-    [],
+    [setColorScaleBounds, setGetColor],
   );
 
   return useMemo(
@@ -161,9 +181,8 @@ export default function useDataToolBox() {
       streamVersion,
       streamInterpolateRef,
 
-      fieldType,
       error,
     }),
-    [updateData, overlayVersion, streamVersion, fieldType, error],
+    [updateData, overlayVersion, streamVersion, error],
   );
 }

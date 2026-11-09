@@ -11,6 +11,7 @@ import Earth, {
   GlobeController,
   type CoastlinesByLOD,
   type ColorScaleBounds,
+  type GetColorFunc,
 } from "@jamstec-spdx/react-earth";
 import type { FeatureCollection, Geometry } from "geojson";
 import "@jamstec-spdx/react-earth/dist/index.css";
@@ -20,9 +21,9 @@ import type { Topology } from "topojson-specification";
 import { DEFAULT_CONFIG } from "./consts";
 import EarthMenu from "./EarthMenu";
 import MarkerPanel from "./MarkerPanel";
-import type { Config, CustomFile, ExtendedMarker } from "./types";
+import type { Config, CustomFile, ExtendedMarker, FieldType } from "./types";
 import useDataToolBox from "./useDataToolBox";
-import { getColorScale, getColorScaleBounds } from "./utils/fieldTypes";
+import { getColorScale } from "./utils/fieldTypes";
 import { getMarkerData } from "./utils/utils";
 
 const globeController = new GlobeController();
@@ -53,6 +54,9 @@ const EarthView = ({
     lowerBound: 0,
     upperBound: 1,
   });
+  const [getColor, setGetColor] = useState<GetColorFunc>(() =>
+    getColorScale("wind", colorScaleBounds),
+  );
 
   const param = useMemo(() => {
     const param = config[!isSecondary ? "param1" : "param2"];
@@ -66,25 +70,22 @@ const EarthView = ({
     overlayToolBoxRef,
     streamVersion,
     streamInterpolateRef,
-    fieldType,
     error,
     updateData,
-  } = useDataToolBox();
+  } = useDataToolBox(setColorScaleBounds, setGetColor);
 
   useEffect(() => {
     updateData(param);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const getColor = useMemo(
-    () => getColorScale(fieldType, colorScaleBounds),
-    [fieldType, colorScaleBounds],
+  const updateColorScale = useCallback(
+    (fieldType: FieldType, newColorScaleBounds: ColorScaleBounds) => {
+      setColorScaleBounds(newColorScaleBounds);
+      setGetColor(() => getColorScale(fieldType, newColorScaleBounds));
+    },
+    [],
   );
-
-  useEffect(() => {
-    const newColorScaleBounds = getColorScaleBounds(param);
-    setColorScaleBounds(newColorScaleBounds);
-  }, [param]);
 
   // ********************
   // * Marker
@@ -142,7 +143,7 @@ const EarthView = ({
           colorScaleBounds={colorScaleBounds}
           isSecondary={isSecondary}
           updateData={updateData}
-          updateColorScaleBounds={setColorScaleBounds}
+          updateColorScale={updateColorScale}
           customFile={customFile}
           uploadCustomFile={setCustomFile}
         />

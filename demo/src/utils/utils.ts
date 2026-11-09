@@ -25,7 +25,8 @@ export const useDebounceFunc = <T = string | number>(
     return () => {
       clearTimeout(handler);
     };
-  }, [value, delay, debounceCallback]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
 };
 
 export function getMarkerData(
