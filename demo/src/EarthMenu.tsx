@@ -100,7 +100,7 @@ const EarthMenu = ({
       <div className={`menu-panel ${!open ? "closed" : ""}`}>
         <MenuRow
           setting="overlay"
-          options={["wind", "current", "temperature"]}
+          options={["wind", "temperature", "invalid_dataset"]}
           selected={config[paramKey]}
           onClick={(option: string) => {
             updateConfig(!isSecondary ? "param1" : "param2", option);

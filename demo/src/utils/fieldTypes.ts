@@ -11,7 +11,6 @@ import { linearInterpolate } from "./maths";
 export function isScalar(fieldType: FieldType) {
   switch (fieldType) {
     case "wind":
-    case "current":
       return false;
     case "temperature":
       return true;
@@ -26,11 +25,6 @@ export function getColorScaleBounds(fieldType: FieldType) {
       return { lowerBound: WIND_LOWER_BOUND, upperBound: WIND_UPPER_BOUND };
     case "temperature":
       return { lowerBound: TEMP_LOWER_BOUND, upperBound: TEMP_UPPER_BOUND };
-    case "current":
-      return {
-        lowerBound: CURRENT_LOWER_BOUND,
-        upperBound: CURRENT_UPPER_BOUND,
-      };
     default:
       throw new Error(`Field type ${fieldType} not handled`);
   }
@@ -48,10 +42,6 @@ export function getColorScale(
     }
     case "temperature": {
       colorSegments = getTemperatureColorScale(colorScaleBounds);
-      break;
-    }
-    case "current": {
-      colorSegments = getCurrentColorScale(colorScaleBounds);
       break;
     }
     default:
@@ -78,14 +68,6 @@ export function getUnit(fieldType: FieldType): Unit {
           return x;
         },
         precision: 1,
-      };
-    case "current":
-      return {
-        label: "cm/s",
-        conversion: function (x: number) {
-          return x;
-        },
-        precision: 2,
       };
     default:
       throw new Error(`Field type ${fieldType} not handled`);
@@ -146,32 +128,4 @@ const getTemperatureColorScale = ({
     color: [255, 51, 153],
   },
   { bound: upperBound, color: [255, 0, 0] },
-];
-
-// ******************
-// * OCEAN CURRENTS *
-// ******************
-
-// blue -> green -> yellow -> pink
-const CURRENT_LOWER_BOUND = 0;
-const CURRENT_UPPER_BOUND = 150;
-
-const getCurrentColorScale = ({
-  lowerBound,
-  upperBound,
-}: ColorScaleBounds): ColorSegment[] => [
-  { bound: lowerBound, color: [0, 0, 255] },
-  {
-    bound: linearInterpolate(lowerBound, upperBound, 0.1),
-    color: [0, 102, 255],
-  },
-  {
-    bound: linearInterpolate(lowerBound, upperBound, 0.4),
-    color: [102, 255, 0],
-  },
-  {
-    bound: linearInterpolate(lowerBound, upperBound, 0.7),
-    color: [255, 255, 102],
-  },
-  { bound: upperBound, color: [255, 204, 255] },
 ];

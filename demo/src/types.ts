@@ -28,7 +28,7 @@ export type ColorScaleBoundsInput = {
 // * Data types     *
 // ******************
 
-export type FieldType = "wind" | "temperature" | "current";
+export type FieldType = "wind" | "temperature" | "invalid_dataset";
 
 /**
  * Raw gridded meteorological data derived from a GRIB dataset.
