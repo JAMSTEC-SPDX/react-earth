@@ -88,9 +88,11 @@ const EarthView = ({
 
   useEffect(() => {
     if (marker) {
-      const newMarker = overlayToolBoxRef.current
-        ? getMarkerData(marker.lon, marker.lat, overlayToolBoxRef.current)
-        : undefined;
+      const newMarker = getMarkerData(
+        marker.lon,
+        marker.lat,
+        overlayToolBoxRef.current,
+      );
       setMarker(newMarker);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -98,11 +100,8 @@ const EarthView = ({
 
   const selectMarker = useCallback(
     (λ: number, φ: number) => {
-      if (!overlayToolBoxRef.current) setMarker(undefined);
-      else {
-        const newMarker = getMarkerData(λ, φ, overlayToolBoxRef.current);
-        setMarker(newMarker);
-      }
+      const newMarker = getMarkerData(λ, φ, overlayToolBoxRef.current);
+      setMarker(newMarker);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [overlayVersion],
