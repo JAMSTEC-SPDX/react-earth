@@ -1,4 +1,5 @@
 import type { FeatureCollection, Geometry } from "geojson";
+import { RGBAColor } from "./utils/colors";
 
 // ***************************
 // * Configuration types     *
@@ -7,6 +8,11 @@ import type { FeatureCollection, Geometry } from "geojson";
 export type Vector = [number, number];
 
 export type Projection = "ortho" | "equirectangular";
+
+export type GetColorFunc = (
+  value: number,
+  alpha?: number | undefined,
+) => RGBAColor;
 
 export type Marker = {
   lat: number;

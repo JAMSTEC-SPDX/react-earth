@@ -10,6 +10,7 @@ import { TRANSPARENT_BLACK } from "./consts";
 import GlobeController from "./GlobeController";
 import type {
   CoastlinesByLOD,
+  GetColorFunc,
   Marker,
   OverlayToolBox,
   Projection,
@@ -21,7 +22,7 @@ import type {
 import useOverlayController from "./useOverlayController";
 import useSvgController from "./useSvgController";
 import applyProjectionToVectorField from "./utils/applyProjectionToVectorField";
-import { type RGBAColor, setPixelColor } from "./utils/colors";
+import { setPixelColor } from "./utils/colors";
 import { createProjection, isInsideCircle } from "./utils/projections";
 import { useView } from "./utils/view";
 import "./styles.css";
@@ -35,7 +36,7 @@ type EarthProps = PropsWithChildren<{
   overlayToolBoxRef: RefObject<
     OverlayToolBox<Vector> | OverlayToolBox<number> | null
   >;
-  getColor: (value: number, alpha?: number | undefined) => RGBAColor;
+  getColor: GetColorFunc;
   streamVersion?: number;
   streamInterpolateRef?: RefObject<VectorInterpolate | null>;
   vectorAnimatorOptions?: VectorAnimatorOptions;
