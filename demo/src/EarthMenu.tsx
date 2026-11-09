@@ -13,19 +13,19 @@ import type { Config, CustomFile, FieldType } from "./types";
 import { ErrorModal, UploadFileModal } from "./UploadCustomFileModals";
 import { isValidRawData } from "./utils/utils";
 
-type MenuRowProps = {
+type MenuRowProps<T extends string> = {
   setting: string;
-  selected: string;
-  options: string[];
-  onClick: (option: string) => void;
+  selected: T;
+  options: T[];
+  onClick: (option: T) => void;
 };
 
-const MenuRow = ({
+const MenuRow = <T extends string>({
   setting,
   selected: activeOption,
   options,
   onClick,
-}: MenuRowProps) =>
+}: MenuRowProps<T>) =>
   options.length ? (
     <div className="setting-row">
       <div className="setting-label">{setting}</div>
@@ -98,36 +98,16 @@ const EarthMenu = ({
 
   const paramOptions = useMemo(
     () =>
-      customFile
+      (customFile
         ? ["wind", "temperature", "custom_dataset", "invalid_dataset"]
-        : ["wind", "temperature", "invalid_dataset"],
+        : ["wind", "temperature", "invalid_dataset"]) as (
+        FieldType | "custom_dataset"
+      )[],
     [customFile],
   );
 
   const toggleMenu = () => {
     setOpen(!open);
-  };
-
-  const updateConfig = (configKey: keyof Config, option: string) => {
-    if (configKey === "projection") {
-      if (option === "ortho" || option === "equirectangular") {
-        setConfig((prev) => ({ ...prev, projection: option }));
-      }
-    } else if (configKey === "compareMode") {
-      setConfig((prev) => ({
-        ...prev,
-        compareMode: option === "compare" ? true : false,
-      }));
-    } else {
-      if (
-        option === "wind" ||
-        option === "temperature" ||
-        option === "invalid_dataset" ||
-        option === "custom_dataset"
-      ) {
-        setConfig((prev) => ({ ...prev, [paramKey]: option }));
-      }
-    }
   };
 
   const handleCustomFileUpload = async (fieldType: FieldType) => {
@@ -156,9 +136,9 @@ const EarthMenu = ({
           setting="overlay"
           options={paramOptions}
           selected={config[paramKey]}
-          onClick={(option: string) => {
-            updateConfig(!isSecondary ? "param1" : "param2", option);
-            updateData(option as FieldType | "custom_dataset", customFile);
+          onClick={(option) => {
+            setConfig((prev) => ({ ...prev, [paramKey]: option }));
+            updateData(option, customFile);
           }}
         />
         {fieldType !== "invalid_dataset" && validConfig && (
@@ -174,13 +154,20 @@ const EarthMenu = ({
               setting="projection"
               options={["ortho", "equirectangular"]}
               selected={config.projection}
-              onClick={(option: string) => updateConfig("projection", option)}
+              onClick={(option) => {
+                setConfig((prev) => ({ ...prev, projection: option }));
+              }}
             />
             <MenuRow
               setting="mode"
               options={["compare", "single"]}
               selected={config.compareMode ? "compare" : "single"}
-              onClick={(option: string) => updateConfig("compareMode", option)}
+              onClick={() => {
+                setConfig((prev) => ({
+                  ...prev,
+                  compareMode: !prev.compareMode,
+                }));
+              }}
             />
           </>
         )}
