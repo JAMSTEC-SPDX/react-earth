@@ -1,9 +1,17 @@
-import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import {
+  useMemo,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 
 import type { ColorScaleBounds } from "@jamstec-spdx/react-earth";
 
 import ColorScale from "./ColorScale";
-import type { Config, FieldType } from "./types";
+import type { Config, CustomFile, FieldType } from "./types";
+import { ErrorModal, UploadFileModal } from "./UploadCustomFileModals";
+import { isValidRawData } from "./utils/utils";
 
 type MenuRowProps = {
   setting: string;
@@ -44,8 +52,13 @@ type EarthMenuProps = {
   validConfig: boolean;
   colorScaleBounds: ColorScaleBounds;
   isSecondary: boolean;
+  customFile?: CustomFile;
   setConfig: Dispatch<SetStateAction<Config>>;
-  updateData: (param: FieldType) => Promise<void>;
+  uploadCustomFile: (customFile: CustomFile) => void;
+  updateData: (
+    param: FieldType | "custom_dataset",
+    customFile?: CustomFile,
+  ) => Promise<void>;
   updateColorScaleBounds: Dispatch<SetStateAction<ColorScaleBounds>>;
 };
 
@@ -54,11 +67,18 @@ const EarthMenu = ({
   validConfig,
   colorScaleBounds,
   isSecondary = false,
+  customFile,
+  uploadCustomFile,
   setConfig,
   updateData,
   updateColorScaleBounds,
 }: EarthMenuProps) => {
   const [open, setOpen] = useState(false);
+
+  const [showUploadFileModal, setShowUploadFileModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const tmpCustomFileRef = useRef<File | null>(null);
 
   const isMainMenu =
     (config.projection === "ortho" && !isSecondary) ||
@@ -68,6 +88,20 @@ const EarthMenu = ({
   const paramKey = useMemo(
     () => (!isSecondary ? "param1" : "param2"),
     [isSecondary],
+  );
+
+  const fieldType = useMemo(() => {
+    const param = config[paramKey];
+    if (param === "custom_dataset") return customFile?.dataType ?? "wind";
+    return param;
+  }, [paramKey, config, customFile]);
+
+  const paramOptions = useMemo(
+    () =>
+      customFile
+        ? ["wind", "temperature", "custom_dataset", "invalid_dataset"]
+        : ["wind", "temperature", "invalid_dataset"],
+    [customFile],
   );
 
   const toggleMenu = () => {
@@ -87,11 +121,31 @@ const EarthMenu = ({
     } else {
       if (
         option === "wind" ||
-        option === "current" ||
-        option === "temperature"
+        option === "temperature" ||
+        option === "invalid_dataset" ||
+        option === "custom_dataset"
       ) {
         setConfig((prev) => ({ ...prev, [paramKey]: option }));
       }
+    }
+  };
+
+  const handleCustomFileUpload = async (fieldType: FieldType) => {
+    const file = tmpCustomFileRef.current;
+    if (!file) throw new Error("No file found.");
+    try {
+      const fileContent = await file.text();
+      const data = JSON.parse(fileContent);
+
+      if (!isValidRawData(data, fieldType)) throw new Error("Invalid file");
+
+      const customFile: CustomFile = { data, dataType: fieldType };
+      uploadCustomFile(customFile);
+      setConfig((prev) => ({ ...prev, [paramKey]: "custom_dataset" }));
+      updateData("custom_dataset", customFile);
+    } catch (e) {
+      console.error(e);
+      setShowErrorModal(true);
     }
   };
 
@@ -100,16 +154,16 @@ const EarthMenu = ({
       <div className={`menu-panel ${!open ? "closed" : ""}`}>
         <MenuRow
           setting="overlay"
-          options={["wind", "temperature", "invalid_dataset"]}
+          options={paramOptions}
           selected={config[paramKey]}
           onClick={(option: string) => {
             updateConfig(!isSecondary ? "param1" : "param2", option);
-            updateData(option as FieldType);
+            updateData(option as FieldType | "custom_dataset", customFile);
           }}
         />
-        {validConfig && (
+        {fieldType !== "invalid_dataset" && validConfig && (
           <ColorScale
-            fieldType={config[paramKey]}
+            fieldType={fieldType}
             colorScaleBounds={colorScaleBounds}
             updateColorScaleBounds={updateColorScaleBounds}
           />
@@ -130,7 +184,31 @@ const EarthMenu = ({
             />
           </>
         )}
+
+        {!isSecondary && (
+          <div>
+            <button
+              className="action-button"
+              onClick={() => {
+                inputRef.current?.click();
+              }}
+            >
+              <input
+                ref={inputRef}
+                type="file"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  const file = e.target.files?.[0];
+                  tmpCustomFileRef.current = file ?? null;
+                  if (file) setShowUploadFileModal(true);
+                }}
+                style={{ display: "none" }}
+              />
+              {customFile ? "Load new custom data" : "Load custom data"}
+            </button>
+          </div>
+        )}
       </div>
+
       <button
         className="menu-toggle"
         onClick={toggleMenu}
@@ -138,6 +216,20 @@ const EarthMenu = ({
       >
         react-earth
       </button>
+
+      {showUploadFileModal && (
+        <UploadFileModal
+          onClose={() => {
+            setShowUploadFileModal(false);
+            tmpCustomFileRef.current = null;
+          }}
+          onSelect={handleCustomFileUpload}
+        />
+      )}
+
+      {showErrorModal && (
+        <ErrorModal onClose={() => setShowErrorModal(false)} />
+      )}
     </>
   );
 };
