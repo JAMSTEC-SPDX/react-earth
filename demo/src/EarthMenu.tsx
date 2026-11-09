@@ -136,7 +136,7 @@ const EarthMenu = ({
         onClick={toggleMenu}
         title={"Show/hide menu"}
       >
-        earth
+        react-earth
       </button>
     </>
   );
