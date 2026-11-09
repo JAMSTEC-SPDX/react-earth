@@ -20,7 +20,7 @@ import type { Topology } from "topojson-specification";
 import { DEFAULT_CONFIG } from "./consts";
 import EarthMenu from "./EarthMenu";
 import MarkerPanel from "./MarkerPanel";
-import type { Config, ExtendedMarker } from "./types";
+import type { Config, CustomFile, ExtendedMarker } from "./types";
 import useDataToolBox from "./useDataToolBox";
 import { getColorScale, getColorScaleBounds } from "./utils/fieldTypes";
 import { getMarkerData } from "./utils/utils";
@@ -47,15 +47,20 @@ const EarthView = ({
   setConfig,
   isSecondary = false,
 }: EarthViewProps) => {
+  const [customFile, setCustomFile] = useState<CustomFile>();
+
   const [colorScaleBounds, setColorScaleBounds] = useState<ColorScaleBounds>({
     lowerBound: 0,
     upperBound: 1,
   });
 
-  const param = useMemo(
-    () => config[!isSecondary ? "param1" : "param2"],
-    [isSecondary, config],
-  );
+  const param = useMemo(() => {
+    const param = config[!isSecondary ? "param1" : "param2"];
+    if (param === "custom_dataset") return customFile?.dataType ?? "wind";
+    if (param === "invalid_dataset") return "wind";
+    return param;
+  }, [isSecondary, config, customFile]);
+
   const {
     overlayVersion,
     overlayToolBoxRef,
@@ -138,6 +143,8 @@ const EarthView = ({
           isSecondary={isSecondary}
           updateData={updateData}
           updateColorScaleBounds={setColorScaleBounds}
+          customFile={customFile}
+          uploadCustomFile={setCustomFile}
         />
       </div>
     </div>

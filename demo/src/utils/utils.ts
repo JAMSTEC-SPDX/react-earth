@@ -6,7 +6,11 @@ import type {
   ExtendedMarker,
   ColorScaleBoundsInput,
   ExtendedOverlayToolBox,
+  FieldType,
+  RawData,
 } from "@/types";
+
+import { isScalar } from "./fieldTypes";
 
 /** Executes the callback after the value changes and the specified delay has elapsed */
 export const useDebounceFunc = <T = string | number>(
@@ -27,9 +31,13 @@ export const useDebounceFunc = <T = string | number>(
 export function getMarkerData(
   λ: number,
   φ: number,
-  overlayToolBox: ExtendedOverlayToolBox,
-): ExtendedMarker {
+  overlayToolBox: ExtendedOverlayToolBox | null,
+): ExtendedMarker | undefined {
+  if (!overlayToolBox) return undefined;
+
   const { dataType, getScalarForOverlay, interpolate } = overlayToolBox;
+  if (dataType == "invalid_dataset") return undefined;
+
   return {
     lon: λ,
     lat: φ,
@@ -54,4 +62,39 @@ export function colorScaleBoundToInputs(
     lowerBound: `${colorScaleBounds.lowerBound}`,
     upperBound: `${colorScaleBounds.upperBound}`,
   };
+}
+
+export function isValidRawData(
+  value: unknown,
+  fieldType: FieldType,
+): value is RawData {
+  if (!Array.isArray(value)) return false;
+
+  const expectedLength = isScalar(fieldType) ? 1 : 2;
+  if (value.length !== expectedLength) return false;
+
+  return value.every((item) => {
+    if (typeof item !== "object" || item === null) return false;
+
+    if (
+      !Array.isArray(item.data) ||
+      !item.data.every((n: unknown) => typeof n === "number")
+    ) {
+      return false;
+    }
+
+    const h = item.header;
+    if (typeof h !== "object" || h === null) return false;
+
+    return (
+      typeof h.nx === "number" &&
+      typeof h.ny === "number" &&
+      typeof h.lon0 === "number" &&
+      typeof h.lat0 === "number" &&
+      typeof h.lon1 === "number" &&
+      typeof h.lat1 === "number" &&
+      typeof h.dx === "number" &&
+      typeof h.dy === "number"
+    );
+  });
 }

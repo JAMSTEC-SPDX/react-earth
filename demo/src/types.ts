@@ -8,8 +8,8 @@ import type {
 
 export type Config = {
   projection: Projection;
-  param1: FieldType;
-  param2: FieldType;
+  param1: FieldType | "custom_dataset";
+  param2: FieldType | "custom_dataset";
   compareMode: boolean;
 };
 
@@ -67,5 +67,10 @@ export type ExtendedMarker = Marker & { type: FieldType } & (
         type: "temperature";
         value: number;
       }
-    | { isScalar: false; type: "wind" | "current"; value: Vector | null }
+    | { isScalar: false; type: "wind"; value: Vector | null }
   );
+
+export type CustomFile = {
+  data: RawData;
+  dataType: FieldType;
+};

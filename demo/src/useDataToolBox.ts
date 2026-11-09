@@ -9,7 +9,12 @@ import {
   type VectorInterpolate,
 } from "@jamstec-spdx/react-earth";
 
-import type { ExtendedOverlayToolBox, FieldType, RawData } from "./types";
+import type {
+  CustomFile,
+  ExtendedOverlayToolBox,
+  FieldType,
+  RawData,
+} from "./types";
 import { isScalar } from "./utils/fieldTypes";
 import { isValue, magnitude } from "./utils/maths";
 
@@ -104,34 +109,48 @@ export default function useDataToolBox() {
   const [fieldType, setFieldType] = useState<FieldType>("wind");
   const [error, setError] = useState(false);
 
-  const updateData = useCallback(async (param: FieldType) => {
-    let overlayData: ExtendedOverlayToolBox | null = null;
+  const updateData = useCallback(
+    async (param: FieldType | "custom_dataset", customFile?: CustomFile) => {
+      let overlayData: ExtendedOverlayToolBox | null = null;
 
-    try {
-      const filename = `${import.meta.env.BASE_URL}data/${param}_data.json`;
-      const res = await fetch(filename);
+      if (param === "custom_dataset") {
+        if (customFile) {
+          overlayData = parseRawData(customFile.data, customFile.dataType);
+        }
+      } else {
+        try {
+          const filename = `${import.meta.env.BASE_URL}data/${param}_data.json`;
+          const res = await fetch(filename);
 
-      if (!res.ok) throw new Error(`Failed to load file: ${filename}`);
-      const rawData = await res.json();
+          if (!res.ok) throw new Error(`Failed to load file: ${filename}`);
+          const rawData = await res.json();
 
-      overlayData = parseRawData(rawData, param);
-    } catch (e) {
-      console.error(e);
-    }
+          overlayData = parseRawData(rawData, param);
+        } catch (e) {
+          console.error(e);
+        }
+      }
 
-    overlayToolBoxRef.current = overlayData;
+      overlayToolBoxRef.current = overlayData;
 
-    streamInterpolateRef.current =
-      overlayData?.dataType === "wind"
-        ? (overlayData.interpolate as VectorInterpolate)
-        : null;
+      const dataType =
+        param === "custom_dataset"
+          ? customFile?.dataType
+          : overlayData?.dataType;
 
-    setFieldType(overlayData?.dataType ?? "wind");
-    setError(overlayData === null);
+      streamInterpolateRef.current =
+        dataType === "wind" && overlayData
+          ? (overlayData.interpolate as VectorInterpolate)
+          : null;
 
-    setOverlayVersion((prev) => prev + 1);
-    setStreamVersion((prev) => prev + 1);
-  }, []);
+      setFieldType(dataType ?? "wind");
+      setError(overlayData === null);
+
+      setOverlayVersion((prev) => prev + 1);
+      setStreamVersion((prev) => prev + 1);
+    },
+    [],
+  );
 
   return useMemo(
     () => ({
