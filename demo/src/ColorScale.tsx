@@ -5,8 +5,6 @@ import {
   type ChangeEvent,
   useEffect,
   useLayoutEffect,
-  type Dispatch,
-  type SetStateAction,
 } from "react";
 
 import type { ColorScaleBounds } from "@jamstec-spdx/react-earth";
@@ -19,13 +17,16 @@ import { colorScaleBoundToInputs, useDebounceFunc } from "./utils/utils";
 type ColorScaleProps = {
   fieldType: FieldType;
   colorScaleBounds: ColorScaleBounds;
-  updateColorScaleBounds: Dispatch<SetStateAction<ColorScaleBounds>>;
+  updateColorScale: (
+    fieldType: FieldType,
+    newColorScaleBounds: ColorScaleBounds,
+  ) => void;
 };
 
 const ColorScale = ({
   fieldType,
   colorScaleBounds,
-  updateColorScaleBounds,
+  updateColorScale,
 }: ColorScaleProps) => {
   const colorScaleRow = useRef<HTMLDivElement | null>(null);
   const colorScaleRef = useRef<HTMLCanvasElement | null>(null);
@@ -39,13 +40,13 @@ const ColorScale = ({
       const lower = parseFloat(newColorScaleBound.lowerBound);
       const upper = parseFloat(newColorScaleBound.upperBound);
       if (!Number.isNaN(lower) && !Number.isNaN(upper)) {
-        updateColorScaleBounds({
+        updateColorScale(fieldType, {
           lowerBound: roundToDecimal(lower),
           upperBound: roundToDecimal(upper),
         });
       }
     },
-    [updateColorScaleBounds],
+    [updateColorScale, fieldType],
   );
   useDebounceFunc(tmpColorScaleBounds, debouncedUpdate, 500);
 

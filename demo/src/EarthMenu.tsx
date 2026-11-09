@@ -59,7 +59,10 @@ type EarthMenuProps = {
     param: FieldType | "custom_dataset",
     customFile?: CustomFile,
   ) => Promise<void>;
-  updateColorScaleBounds: Dispatch<SetStateAction<ColorScaleBounds>>;
+  updateColorScale: (
+    fieldType: FieldType,
+    newColorScaleBounds: ColorScaleBounds,
+  ) => void;
 };
 
 const EarthMenu = ({
@@ -71,7 +74,7 @@ const EarthMenu = ({
   uploadCustomFile,
   setConfig,
   updateData,
-  updateColorScaleBounds,
+  updateColorScale,
 }: EarthMenuProps) => {
   const [open, setOpen] = useState(false);
 
@@ -145,7 +148,7 @@ const EarthMenu = ({
           <ColorScale
             fieldType={fieldType}
             colorScaleBounds={colorScaleBounds}
-            updateColorScaleBounds={updateColorScaleBounds}
+            updateColorScale={updateColorScale}
           />
         )}
         {isMainMenu && (
