@@ -8,8 +8,7 @@ import type {
   ExtendedOverlayToolBox,
   FieldType,
   RawData,
-} from "@/types";
-
+} from "../types";
 import { isScalar } from "./fieldTypes";
 
 /** Executes the callback after the value changes and the specified delay has elapsed */

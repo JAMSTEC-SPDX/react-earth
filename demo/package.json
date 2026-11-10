@@ -9,9 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@jamstec-spdx/react-earth": "*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "@jamstec-spdx/react-earth": "*",
+    "react-router-dom": "^7.18.5",
     "topojson-client": "^3.1.0"
   },
   "devDependencies": {
