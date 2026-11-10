@@ -6,7 +6,7 @@
 
 It provides a reusable React component for displaying dynamic Earth-science datasets such as atmospheric and oceanographic fields, vector flows, markers, and other geospatial information on an interactive globe.
 
-React Earth is inspired by and largely based on the excellent [earth project](https://github.com/cambecc/earth) by Cameron Beccario, adapted to provide a reusable React/TypeScript component and make Earth-data visualizations easier to integrate into web applications.
+react-earth is inspired by and largely based on the excellent [earth project](https://github.com/cambecc/earth) by Cameron Beccario, adapted to provide a reusable React/TypeScript component and make Earth-data visualizations easier to integrate into web applications.
 
 The project is developed by the [Japan Agency for Marine-Earth Science and Technology (JAMSTEC)](https://www.jamstec.go.jp/e/) to support interactive visualization of scientific data related to the ocean, atmosphere, climate, and Earth sciences.
 

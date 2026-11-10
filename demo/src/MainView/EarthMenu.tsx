@@ -7,6 +7,7 @@ import {
 } from "react";
 
 import type { ColorScaleBounds } from "@jamstec-spdx/react-earth";
+import { useNavigate } from "react-router-dom";
 
 import ColorScale from "./ColorScale";
 import type { Config, CustomFile, FieldType } from "./types";
@@ -76,6 +77,8 @@ const EarthMenu = ({
   updateData,
   updateColorScale,
 }: EarthMenuProps) => {
+  const navigate = useNavigate();
+
   const [open, setOpen] = useState(false);
 
   const [showUploadFileModal, setShowUploadFileModal] = useState(false);
@@ -194,6 +197,15 @@ const EarthMenu = ({
                 style={{ display: "none" }}
               />
               {customFile ? "Load new custom data" : "Load custom data"}
+            </button>
+
+            <button
+              className="action-button"
+              onClick={() => {
+                navigate("/about");
+              }}
+            >
+              Documentation
             </button>
           </div>
         )}
