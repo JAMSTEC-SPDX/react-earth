@@ -91,8 +91,6 @@ export function isValidRawData(
       typeof h.ny === "number" &&
       typeof h.lon0 === "number" &&
       typeof h.lat0 === "number" &&
-      typeof h.lon1 === "number" &&
-      typeof h.lat1 === "number" &&
       typeof h.dx === "number" &&
       typeof h.dy === "number"
     );
