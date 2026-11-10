@@ -91,7 +91,9 @@ function parseRawData(
     const v = vData[i];
 
     overlayData[i] =
-      !Number.isNaN(u) && !Number.isNaN(v) ? Math.sqrt(u * u + v * v) : NaN;
+      u && v && !Number.isNaN(u) && !Number.isNaN(v)
+        ? Math.sqrt(u * u + v * v)
+        : NaN;
   }
 
   const interpolate = interpolateVectorField(json);

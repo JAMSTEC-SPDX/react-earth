@@ -78,7 +78,7 @@ export function isValidRawData(
 
     if (
       !Array.isArray(item.data) ||
-      !item.data.every((n: unknown) => typeof n === "number")
+      !item.data.every((n: unknown) => n === null || typeof n === "number")
     ) {
       return false;
     }

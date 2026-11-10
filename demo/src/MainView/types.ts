@@ -49,7 +49,7 @@ export type RawData = {
    * longitude–latitude grid described by the header. The total number
    * of elements should be `nx * ny`.
    */
-  data: number[];
+  data: (number | null)[];
   header: GridParams;
 }[];
 
