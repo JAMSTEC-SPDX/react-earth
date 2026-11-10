@@ -10,21 +10,21 @@
   },
   "dependencies": {
     "@jamstec-spdx/react-earth": "*",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "react-router-dom": "^7.18.5",
     "topojson-client": "^3.1.0"
   },
   "devDependencies": {
     "@types/geojson": "^7946.0.16",
-    "@types/node": "^26.6.5",
+    "@types/node": "^26.6.6",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@types/topojson-client": "^3.1.5",
     "@types/topojson-specification": "^1.0.5",
-    "@vitejs/plugin-react": "^6.1.2",
-    "globals": "^17.13.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "globals": "^17.14.0",
     "sass": "^1.108.1",
-    "vite": "^8.3.4"
+    "vite": "^8.3.6"
   }
 }
