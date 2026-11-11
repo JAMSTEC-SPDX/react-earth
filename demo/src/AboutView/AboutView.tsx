@@ -53,6 +53,31 @@ export default function App() {
   );
 }`;
 
+const rawDataDescription = `type RawData = {
+  /**
+   * Flattened array of grid values.
+   *
+   * Values are stored in row-major order and correspond to a regular
+   * longitude–latitude grid described by the header. The total number
+   * of elements should be nx * ny.
+   */
+  data: (number | null)[];
+
+  header:  {
+    /** Number of grid points along the longitude and latitude axis */
+    nx: number;
+    ny: number;
+  
+    /** Longitude and latitude of the first grid point (degrees) */
+    lon0: number;
+    lat0: number;
+
+    /** Grid spacing in the longitudinal and latitudinal direction (degrees) */
+    dx: number;
+    dy: number;
+  };
+}[];`;
+
 function Hero() {
   return (
     <section className="hero" id="overview">
@@ -75,7 +100,7 @@ function Hero() {
         <div className="hero-actions">
           <a className="button button-primary" href="#demo">
             <span className="material-symbols-outlined">play_arrow</span>
-            Explore the demo
+            Try it now
           </a>
           <a
             className="button button-secondary"
@@ -197,15 +222,46 @@ function PrinciplesSection() {
 }
 
 function GettingStartedSection() {
+  // const steps = [
+  //   [
+  //     "01",
+  //     "Prepare your data",
+  //     "Prepare the spatial dataset in a structure compatible with the library.",
+  //   ],
+  //   [
+  //     "02",
+  //     "Configure the visualization",
+  //     "Choose the visualization settings and define how scalar values should be mapped to colors.",
+  //   ],
+  //   [
+  //     "03",
+  //     "Pass data to react-earth",
+  //     "Provide the data and configuration to the Earth component through its props.",
+  //   ],
+  //   [
+  //     "04",
+  //     "Explore the globe",
+  //     "Use the interactive globe to explore the geographical distribution of your data.",
+  //   ],
+  // ];
   return (
     <section className="getting-started-section" id="getting-started">
       <div className="container">
         <SectionHeading
           number="03"
-          label="Getting started"
-          title="Add an interactive globe to your React application."
+          label="Getting started (developers)"
+          title="Add an interactive globe to your own frontend application."
           subtitle="Install the package and use the Earth component in your project."
         />
+        {/* <div className="card-grid grid-4 workflow">
+          {steps.map(([number, title, description]) => (
+            <article className="step-card" key={number}>
+              <span className="step-number tone-text">STEP {number}</span>
+              <h3>{title}</h3>
+              <p>{description}</p>
+            </article>
+          ))}
+        </div> */}
         <div className="code-stack">
           <CodeBlock title="1. Install the npm package" code={installCommand} />
           <CodeBlock
@@ -269,45 +325,104 @@ function ComponentSection() {
   );
 }
 
-function WorkflowSection() {
-  const steps = [
-    [
-      "01",
-      "Prepare your data",
-      "Prepare the spatial dataset in a structure compatible with the library.",
-    ],
-    [
-      "02",
-      "Configure the visualization",
-      "Choose the visualization settings and define how scalar values should be mapped to colors.",
-    ],
-    [
-      "03",
-      "Pass data to react-earth",
-      "Provide the data and configuration to the Earth component through its props.",
-    ],
-    [
-      "04",
-      "Explore the globe",
-      "Use the interactive globe to explore the geographical distribution of your data.",
-    ],
+function DemoSection() {
+  const principles = [
+    {
+      icon: "data_object",
+      title: "Prepare your data",
+      description:
+        "React Earth uses a GRIB-like JSON format. Check the example files below to understand the expected structure.",
+      footer: "Structured GRIB-JSON",
+    },
+    {
+      icon: "upload_file",
+      title: "Upload and explore",
+      description:
+        "Load your JSON file and visualize your data on the interactive globe.",
+      footer: "Instant 3D Globe Render",
+    },
+    {
+      icon: "lock",
+      title: "100% local processing",
+      description:
+        "Your uploaded files are processed directly in your browser. No data is sent to a remote server.",
+      footer: (
+        <div className="lock-card-footer">
+          <span className="material-symbols-outlined">verified_user</span>
+          Browser-Only • Client-Side Privacy
+        </div>
+      ),
+    },
   ];
+
   return (
-    <section className="workflow-section" id="workflow">
+    <section className="demo-section section-alt" id="workflow">
       <div className="container">
         <SectionHeading
           number="02"
-          label="Workflow"
-          title="From spatial data to visualization."
+          label="Start using the demonstration website"
+          title="Visualize your own data in 2 clicks."
         />
-        <div className="card-grid grid-4 workflow">
-          {steps.map(([number, title, description]) => (
-            <article className="step-card" key={number}>
-              <span className="step-number tone-text">STEP {number}</span>
-              <h3>{title}</h3>
-              <p>{description}</p>
-            </article>
+        <div className="card-grid grid-3 principles">
+          {principles.map((item) => (
+            <PrincipleCard key={item.title} {...item} />
           ))}
+        </div>
+
+        <div className="data-format">
+          <div className="data-header">
+            <div className="data-description">
+              <div className="data-title">
+                <span className="material-symbols-outlined">description</span>
+                <h3>Expected data format: GRIB-like JSON</h3>
+              </div>
+
+              <p>
+                Your JSON files must contain a header (grid dimensions,
+                coordinates and resolution) and a data array (numerical values).
+              </p>
+            </div>
+
+            <div className="data-examples">
+              <a
+                href={
+                  "https://github.com/JAMSTEC-SPDX/react-earth/blob/main/demo/public/data/temperature_data.json"
+                }
+                target="_blank"
+                rel="noreferrer"
+                className="see-example-button"
+              >
+                <span className="material-symbols-outlined">visibility</span>
+                See scalar example
+              </a>
+
+              <a
+                href={
+                  "https://github.com/JAMSTEC-SPDX/react-earth/blob/main/demo/public/data/wind_data.json"
+                }
+                target="_blank"
+                rel="noreferrer"
+                className="see-example-button"
+              >
+                <span className="material-symbols-outlined">visibility</span>
+                See vector example
+              </a>
+            </div>
+          </div>
+
+          <div className="demo-grib-format">
+            <CodeBlock
+              title="GRIB-like JSON format"
+              code={rawDataDescription}
+            />
+          </div>
+
+          <div className="note">
+            <span className="note-label">NOTE:</span> Need more flexibility? The
+            online demo offers limited customization. You can deploy your own
+            version of React Earth to access more configuration options and
+            integrate it into your own projects (see next section).
+          </div>
         </div>
       </div>
     </section>
@@ -365,7 +480,7 @@ export default function AboutView() {
       <main>
         <Hero />
         <PrinciplesSection />
-        <WorkflowSection />
+        <DemoSection />
         <GettingStartedSection />
         <ComponentSection />
         <UnderTheHoodSection />

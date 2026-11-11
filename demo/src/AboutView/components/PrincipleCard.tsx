@@ -1,8 +1,10 @@
+import type React from "react";
+
 type PrincipleCardProps = {
   icon: string;
   title: string;
   description: string;
-  footer: string;
+  footer: React.ReactNode;
 };
 
 export default function PrincipleCard({
