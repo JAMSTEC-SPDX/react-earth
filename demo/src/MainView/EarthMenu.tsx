@@ -138,6 +138,10 @@ const EarthMenu = ({
   return (
     <>
       <div className={`menu-panel ${!open ? "closed" : ""}`}>
+        <p className="note">
+          These datasets are synthetic data created specifically for this
+          demonstration.
+        </p>
         <MenuRow
           setting="overlay"
           options={paramOptions}
@@ -177,7 +181,6 @@ const EarthMenu = ({
             />
           </>
         )}
-
         {!isSecondary && (
           <div>
             <button
