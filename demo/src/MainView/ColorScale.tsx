@@ -4,7 +4,6 @@ import {
   useCallback,
   type ChangeEvent,
   useEffect,
-  useLayoutEffect,
 } from "react";
 
 import type { ColorScaleBounds } from "@jamstec-spdx/react-earth";
@@ -30,7 +29,6 @@ const ColorScale = ({
 }: ColorScaleProps) => {
   const colorScaleRow = useRef<HTMLDivElement | null>(null);
   const colorScaleRef = useRef<HTMLCanvasElement | null>(null);
-  const [colorScaleWidth, setColorScaleWidth] = useState(200);
 
   const [tmpColorScaleBounds, setTmpColorScaleBounds] =
     useState<ColorScaleBoundsInput>(colorScaleBoundToInputs(colorScaleBounds));
@@ -68,14 +66,6 @@ const ColorScale = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [colorScaleBounds]);
 
-  useLayoutEffect(() => {
-    if (colorScaleRow.current) {
-      // substract the label, the padding and the inputs width
-      const width = colorScaleRow.current.offsetWidth - 120 - 12 - (64 + 5) * 2;
-      setColorScaleWidth(width);
-    }
-  }, []);
-
   useEffect(() => {
     if (!colorScaleRef.current) return;
     const colorBar = colorScaleRef.current;
@@ -93,7 +83,7 @@ const ColorScale = ({
       ctx.fillStyle = "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")";
       ctx.fillRect(i, 0, 1, colorBar.height);
     }
-  }, [colorScaleWidth, colorScaleBounds, fieldType]);
+  }, [colorScaleBounds, fieldType]);
 
   return (
     <div ref={colorScaleRow} className="setting-row">
@@ -111,10 +101,7 @@ const ColorScale = ({
             {getUnit(fieldType).label}
           </span>
         </div>
-        <canvas
-          ref={colorScaleRef}
-          style={{ height: "22.5px", width: `${colorScaleWidth}px` }}
-        />
+        <canvas ref={colorScaleRef} style={{ height: "22.5px" }} />
         <div className="color-scale-input-container">
           <input
             type="text"
