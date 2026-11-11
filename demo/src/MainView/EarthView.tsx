@@ -21,7 +21,6 @@ import type { Config, CustomFile, ExtendedMarker, FieldType } from "./types";
 import useDataToolBox from "./useDataToolBox";
 import { getColorScale } from "./utils/fieldTypes";
 import { getMarkerData } from "./utils/utils";
-import "./index.css";
 
 const globeController = new GlobeController();
 

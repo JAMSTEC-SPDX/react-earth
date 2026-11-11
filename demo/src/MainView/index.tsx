@@ -7,6 +7,7 @@ import type { Topology } from "topojson-specification";
 
 import { DEFAULT_CONFIG } from "./consts";
 import EarthView from "./EarthView";
+import "./main-view.scss";
 
 const MainView = () => {
   const [config, setConfig] = useState(DEFAULT_CONFIG);
