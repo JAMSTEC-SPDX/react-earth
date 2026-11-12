@@ -106,26 +106,34 @@ const getWindColorScale = ({
 // * Temperature *
 // ***************
 
-// blue -> white -> red
-const TEMP_LOWER_BOUND = -2;
-const TEMP_UPPER_BOUND = 2;
+// white -> cyan blue -> electric blue -> black -> red -> yellow -> white
+const TEMP_LOWER_BOUND = -5;
+const TEMP_UPPER_BOUND = 5;
 
 const getTemperatureColorScale = ({
   lowerBound,
   upperBound,
 }: ColorScaleBounds): ColorSegment[] => [
-  { bound: lowerBound, color: [0, 0, 255] },
+  { bound: lowerBound, color: [255, 255, 255] },
   {
-    bound: linearInterpolate(lowerBound, upperBound, 0.25),
-    color: [0, 102, 255],
+    bound: linearInterpolate(lowerBound, upperBound, 0.3),
+    color: [86, 253, 255],
+  },
+  {
+    bound: linearInterpolate(lowerBound, upperBound, 0.4),
+    color: [87, 56, 255],
   },
   {
     bound: linearInterpolate(lowerBound, upperBound, 0.5),
-    color: [255, 255, 255],
+    color: [0, 0, 0],
   },
   {
-    bound: linearInterpolate(lowerBound, upperBound, 0.75),
-    color: [255, 51, 153],
+    bound: linearInterpolate(lowerBound, upperBound, 0.6),
+    color: [232, 28, 36],
   },
-  { bound: upperBound, color: [255, 0, 0] },
+  {
+    bound: linearInterpolate(lowerBound, upperBound, 0.7),
+    color: [246, 248, 50],
+  },
+  { bound: upperBound, color: [255, 255, 255] },
 ];
